@@ -20,3 +20,13 @@ function sif_permission() {
 
   return $permissions;
 }
+
+
+/**
+ * Helper for generating our application key.
+ */
+function sif_get_application_key(){
+  $token = variable_get('sif_server_auth_token', 'new');
+  $secret = variable_get('sif_server_auth_secret', 'guest');
+  return "Basic " . base64_encode($token . ':' . $secret);
+}
