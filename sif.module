@@ -30,3 +30,14 @@ function sif_get_application_key(){
   $secret = variable_get('sif_server_auth_secret', 'guest');
   return "Basic " . base64_encode($token . ':' . $secret);
 }
+
+
+/**
+ * Helper to get human readable XML
+ */
+function clean_xml($xml){
+  $simpleXml = new SimpleXMLElement($xml);
+  $dom = dom_import_simplexml($simpleXml)->ownerDocument;
+  $dom->formatOutput = true;
+  return $dom->saveXML();
+}
