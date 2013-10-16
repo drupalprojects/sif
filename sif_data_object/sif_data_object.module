@@ -47,7 +47,7 @@ function sif_object_entity_info() {
 /**
  * Implements hook_sif_data_object_types()
  */
-function sif_object_sif_data_object_types(){
+function sif_data_object_sif_data_object_types(){
   return array(
     'environment' => t('Environment'),
     'zone' => t('Zone'),

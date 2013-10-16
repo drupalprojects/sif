@@ -29,5 +29,20 @@ function sif_ui_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/sif_ui.admin.inc',
   );
+  $items['admin/sif/environments'] = array(
+    'title' => 'Environments',
+    'description' => 'Create and manage SIF environments.',
+    'page callback' => 'sif_ui_environments',
+    'access arguments' => array('configure sif'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/environments.inc',
+  );
+  $items['admin/sif/types'] = array(
+    'title' => 'Data Object Types',
+    'description' => 'Manage the SIF Data Object Types.',
+    'page callback' => 'sif_ui_data_object_types',
+    'access arguments' => array('configure sif'),
+    'file' => 'includes/types.inc',
+  );
   return $items;
 }
