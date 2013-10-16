@@ -9,10 +9,34 @@
  */
 function sif_ui_environments(){
 
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'sif_data_object')
+    ->entityCondition('bundle', 'environment');
+  $result = $query->execute();
 
-  $output = t('You have not defined an environment for this site. !link', array('!link' => l('Create an environment', 'admin/sif/environments/create')));
+  if (isset($result['sif_data_object'])) {
+    foreach ($result['sif_data_object'] as $object){
+      $object_ids = array_keys($result['sif_data_object']);
+      $environments = entity_load('sif_data_object', $object_ids);
+    }
+    $rows = array();
+    foreach ($environments as $environment){
+      $row = array($environment->id);
+      $row[] = '<pre>' . htmlspecialchars(clean_xml($environment->xml)) . '</pre>';
+      $rows[] = $row;
+    }
+  }
+  $header = array('id', 'xml');
 
-  return $output;
+  $build['environments'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('You have not defined an environment for this site.'),
+    '#caption' => l('Create a new environment', 'admin/sif/environments/create'),
+  );
+
+  return $build;
 }
 
 /**
