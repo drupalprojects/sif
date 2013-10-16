@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file sif.module
+ * Main module file for SIF Integration
+ */
+
+
+/**
+ * Implements hook_permission().
+ */
+function sif_permission() {
+  $permissions = array(
+    'configure sif' => array(
+      'title' => t('Configure SIF'),
+      'description' => t('Allows users to configure SIF server settings.'),
+      'restrict access' => TRUE,
+    ),
+  );
+
+  return $permissions;
+}

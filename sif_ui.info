@@ -1,0 +1,5 @@
+name = SIF UI
+description = User interface for configuring SIF.
+package = SIF
+core = 7.x
+configure = admin/sif

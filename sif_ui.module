@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Defines menu items common to the various Drupal Commerce UI modules.
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function sif_ui_menu() {
+  $items = array();
+  $items['admin/sif'] = array(
+    'title' => 'SIF',
+    'description' => 'Administer SIF.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+    'weight' => -7,
+  );
+  $items['admin/sif/config'] = array(
+    'title' => 'SIF Server',
+    'description' => 'Configure the SIF Server and authentication.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_settings_form'),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/sif_ui.admin.inc',
+  );
+  return $items;
+}

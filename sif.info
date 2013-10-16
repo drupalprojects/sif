@@ -1,0 +1,4 @@
+name = SIF
+description = Integrates with the Schools Interoperability Framework.
+package = SIF
+core = 7.x
