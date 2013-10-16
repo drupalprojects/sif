@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Provides a storage for SIF Data Objects.
+ */
+function sif_object_entity_info() {
+  $return = array(
+    'sif_data_object' => array(
+      'label' => t('SIF Data Object'),
+      'controller class' => '',
+      'base table' => 'sif_object',
+      'uri callback' => 'sif_object_uri',
+      'fieldable' => TRUE,
+      'entity keys' => array(
+        'id' => 'id',
+        'revision' => 'vid',
+        'bundle' => 'type',
+      ),
+      'bundles' => array(),
+      'view modes' => array(
+        'preview' => array(
+          'label' => t('Data Preview'),
+        ),
+        'xml' => array(
+          'label' => t('Raw XML'),
+        ),
+      ),
+    ),
+  );
+
+  $objects = module_invoke_all('sif_data_object_types');
+  foreach ($objects as $type => $name) {
+    $return['sif_data_object']['bundles'][$type] = array(
+      'label' => $name,
+      'admin' => array(
+        'path' => 'admin/sif/objects/%type',
+        'real path' => 'admin/sif/objects/' . $type,
+        'bundle argument' => 3,
+        'access arguments' => array('configure sif'),
+      ),
+    );
+  }
+  return $return;
+}
+
+/**
+ * Implements hook_sif_data_object_types()
+ */
+function sif_object_sif_data_object_types(){
+  return array(
+    'environment' => t('Environment'),
+    'zone' => t('Zone'),
+    'queue' => t('Queue'),
+    'subscription' => t('Subscription'),
+    'alert' => t('Alert'),
+    'student' => t('Student'),
+  );
+}

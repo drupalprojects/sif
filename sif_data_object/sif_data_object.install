@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * Install and Schema for sif_objects.module
+ */
+
+/**
+ * Implements hook_schema()
+ */
+function sif_data_object_schema(){
+ $schema['sif_data_object'] = array(
+    'description' => 'The base table for SIF Data Objects.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for data object.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'type' => array(
+        'description' => 'The Data Object Type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the node was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the node was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'xml' => array(
+        'description' => 'The XML representation of this object.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+}
