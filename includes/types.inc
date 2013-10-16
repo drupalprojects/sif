@@ -1,13 +1,12 @@
 <?php
 
+/**
+ * Data Object Types overview page.
+ */
 function sif_ui_data_object_types() {
 
   $objects = module_invoke_all('sif_data_object_types');
-dsm($objects);
-  $header = array(t('Name'), array(
-    'data' => t('Operations'),
-    'colspan' => '2',
-  ));
+  $header = array(t('Name'));
   $rows = array();
 
   foreach ($objects as $key => $name) {
@@ -15,8 +14,7 @@ dsm($objects);
 
     $type_url_str = str_replace('_', '-', $key);
     $row = array($name);
-    // Set the edit column.
-    $row[] = array('data' => l(t('Describe'), 'admin/sif/types/' . $type_url_str));
+    //$row[] = array('data' => l(t('Describe'), 'admin/sif/types/' . $type_url_str));
     $rows[] = $row;
   }
 
@@ -25,6 +23,7 @@ dsm($objects);
     '#header' => $header,
     '#rows' => $rows,
     '#empty' => t('No data object types available.'),
+    '#caption' => t('These are the available data objects that this site can store. Use hook_sif_data_object_types() to add more.'),
   );
 
   return $build;
