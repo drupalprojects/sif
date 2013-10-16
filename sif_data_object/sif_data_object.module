@@ -4,18 +4,20 @@
  * @file
  * Provides a storage for SIF Data Objects.
  */
-function sif_object_entity_info() {
+function sif_data_object_entity_info() {
   $return = array(
     'sif_data_object' => array(
       'label' => t('SIF Data Object'),
-      'controller class' => '',
-      'base table' => 'sif_object',
+      'controller class' => 'EntityAPIController',
+      'base table' => 'sif_data_object',
       'uri callback' => 'sif_object_uri',
       'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'id',
-        'revision' => 'vid',
         'bundle' => 'type',
+      ),
+      'bundle keys' => array(
+        'bundle' => 'name',
       ),
       'bundles' => array(),
       'view modes' => array(

@@ -15,7 +15,7 @@ function sif_data_object_schema(){
       'id' => array(
         'description' => 'The primary identifier for data object.',
         'type' => 'varchar',
-        'length' => 32,
+        'length' => 64,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -47,4 +47,5 @@ function sif_data_object_schema(){
     ),
     'primary key' => array('id'),
   );
+ return $schema;
 }
