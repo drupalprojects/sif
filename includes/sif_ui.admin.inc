@@ -28,7 +28,14 @@ function sif_settings_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Consumer Secret'),
     '#description' => t('Enter the secret to access this server (Similar to a username).'),
-    '#default_value' => variable_get('sif_server_auth_token', 'guest'),
+    '#default_value' => variable_get('sif_server_auth_secret', 'guest'),
+    '#required' => TRUE,
+  );
+  $form['sif_server_solution_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Solution ID'),
+    '#description' => t('Enter the solution ID to use.'),
+    '#default_value' => variable_get('sif_server_solution_id', 'testSolution'),
     '#required' => TRUE,
   );
   return system_settings_form($form);

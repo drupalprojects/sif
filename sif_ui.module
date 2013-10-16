@@ -37,6 +37,15 @@ function sif_ui_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/environments.inc',
   );
+  $items['admin/sif/environments/create'] = array(
+    'title' => 'Create Environment',
+    'description' => 'Create a new environment.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_ui_environment_create'),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/environments.inc',
+  );
   $items['admin/sif/types'] = array(
     'title' => 'Data Object Types',
     'description' => 'Manage the SIF Data Object Types.',
