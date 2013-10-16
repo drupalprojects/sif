@@ -3,3 +3,6 @@ description = User interface for configuring SIF.
 package = SIF
 core = 7.x
 configure = admin/sif
+
+dependencies[] = sif
+dependencies[] = sif_data_object

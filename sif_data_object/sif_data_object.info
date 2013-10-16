@@ -2,3 +2,6 @@ name = SIF Data Object
 description = Provides entities for each SIF data object type.
 package = SIF
 core = 7.x
+
+dependencies[] = entity
+dependencies[] = sif
