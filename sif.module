@@ -35,9 +35,14 @@ function sif_get_application_key(){
 /**
  * Helper to get human readable XML
  */
-function clean_xml($xml){
+function clean_xml($xml, $html_encode = FALSE){
   $simpleXml = new SimpleXMLElement($xml);
   $dom = dom_import_simplexml($simpleXml)->ownerDocument;
   $dom->formatOutput = true;
-  return $dom->saveXML();
+  $output = $dom->saveXML();
+  if ($html_encode){
+    return '<pre>' . htmlspecialchars($output) . '</pre>';
+  } else {
+    return $output;
+  }
 }

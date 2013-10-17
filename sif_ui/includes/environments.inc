@@ -22,7 +22,7 @@ function sif_ui_environments(){
     $rows = array();
     foreach ($environments as $environment){
       $row = array();
-      $row[] = $environment->consumerName;
+      $row[] = l($environment->consumerName, "sif/$environment->id");
       $row[] = $environment->solutionId;
       $row[] = $environment->defaultZoneId;
       $row[] = $environment->sessionToken;
