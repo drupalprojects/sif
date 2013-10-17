@@ -4,6 +4,7 @@
  * Page callback for sif/%sif_object
  */
 function sif_object_view_page($sif, $view_mode = 'details') {
+  drupal_set_title(t('SIF Data Object') . ' ' . $sif->id);
   return sif_object_view($sif, $view_mode);
 }
 
