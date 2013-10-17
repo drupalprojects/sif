@@ -33,7 +33,6 @@ function sif_ui_environments(){
     '#header' => $header,
     '#rows' => $rows,
     '#empty' => t('You have not defined an environment for this site.'),
-    '#caption' => l('Create a new environment', 'admin/sif/environments/create'),
   );
 
   return $build;
