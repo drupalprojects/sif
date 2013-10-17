@@ -56,15 +56,28 @@ function sif_ui_environments(){
  * Create Environment form.
  */
 function sif_ui_environment_create(){
-  $form['xml'] = array(
-    '#type' => 'textarea',
-    '#title' => 'Environment XML',
-    '#default_value' => sif_environment_xml(),
-    '#description' => t('Enter the environment XML to create.'),
+  $form['consumer_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Consumer Name'),
+    '#description' => t('Enter the Consumer Name you would like to use for this application.'),
+    '#default_value' => variable_get('site_name', ''),
+    '#required' => TRUE,
+  );
+  $form['solution_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Solution ID'),
+    '#description' => t('Enter the solution ID to use for this environment.'),
+    '#default_value' => variable_get('sif_server_solution_id', 'testSolution'),
+    '#required' => TRUE,
   );
   $form['submit'] = array(
     '#value' => t('POST Environment'),
     '#type' => 'submit',
+  );
+
+  // Placeholder element for the validate function.
+  $form['xml'] = array(
+    '#type' => 'value',
   );
   return $form;
 }
@@ -78,9 +91,11 @@ function sif_ui_environment_create_validate($form, &$form_state) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
   $url .= '/environments/environment';
 
+  $xml = sif_environment_xml($form_state['values']['consumer_name'], $form_state['values']['solution_id']);
+
   $options = array(
     'method' => 'POST',
-    'data' => $form_state['values']['xml'],
+    'data' => $xml,
     'headers' => array(
       'Authorization' => sif_get_application_key(),
       'Accept' => 'application/xml',
@@ -123,10 +138,8 @@ function sif_ui_environment_create_submit($form, &$form_state) {
 /**
  * Generate a new environment XML object for POSTing
  */
-function sif_environment_xml(){
-  $solutionId = variable_get('sif_server_solution_id', 'testSolution');
+function sif_environment_xml($consumerName, $solutionId){
   $applicationKey = sif_get_application_key();
-  $consumerName = variable_get('site_name', '');
   return <<<XML
 <environment>
   <solutionId>$solutionId</solutionId>
