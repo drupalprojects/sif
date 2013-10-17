@@ -88,6 +88,20 @@ function sif_ui_menu() {
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'includes/pages.inc',
   );
+
+  // Optional devel module integration
+  if (module_exists('devel')) {
+    $items['sif/%sif_object/devel'] = array(
+      'title' => 'Devel',
+      'page callback' => 'devel_load_object',
+      'page arguments' => array('sif_data_object', 1),
+      'access arguments' => array('access devel information'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'devel.pages.inc',
+      'file path' => drupal_get_path('module', 'devel'),
+      'weight' => 100,
+    );
+  }
   return $items;
 }
 
