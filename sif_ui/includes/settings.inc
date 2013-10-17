@@ -27,7 +27,7 @@ function sif_settings_form($form, &$form_state) {
   $form['sif_server_auth_secret'] = array(
     '#type' => 'textfield',
     '#title' => t('Consumer Secret'),
-    '#description' => t('Enter the secret to access this server (Similar to a username).'),
+    '#description' => t('Enter the secret to access this server (Similar to a password).'),
     '#default_value' => variable_get('sif_server_auth_secret', 'guest'),
     '#required' => TRUE,
   );
