@@ -28,8 +28,8 @@ function sif_ui_environments(){
       $row[] = $environment->sessionToken;
 
       $items = array();
-      foreach ($environment->infrastructureServices->infrastructureService as $s) {
-        $items[] = l($s->attributes()->name, (string) $s); //print_r($s,1);
+      foreach ($environment->infrastructureServices as $name => $url) {
+        $items[] = l($name, $url);
       }
       $row[] = theme('item_list', array('items' => $items));
       $row[] = $environment->id;

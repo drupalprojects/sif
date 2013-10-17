@@ -18,12 +18,18 @@ class SifEntityAPIController extends EntityAPIController {
       $entity->data = new SimpleXMLElement($entity->xml);
       switch ($entity->type){
         case 'environment':
+          //String Properties
           $properties = array('sessionToken', 'solutionId', 'defaultZoneId', 'consumerName');
           foreach ($properties as $property){
             $entity->{$property} = (string) $entity->data->{$property};
           }
-          $entity->infrastructureServices = $entity->data->infrastructureServices;
-          //$entity->infrastructureServices = $entity->infrastructureServices['infrastructureService'];
+
+          // Infrastructure Services
+          $entity->infrastructureServices = array();
+          foreach ($entity->data->infrastructureServices->infrastructureService as $s){
+            $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
+          }
+
           break;
       }
     }
