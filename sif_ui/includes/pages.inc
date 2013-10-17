@@ -34,6 +34,6 @@ function sif_object_view($sif, $view_mode = 'details') {
 
   // Allow modules to modify the structured file.
   $type = 'sif_data_object';
-  drupal_alter(array('sif_entit', 'entity_view'), $build, $type);
+  drupal_alter(array('sif_entity', 'entity_view'), $build, $type);
   return $build;
 }
