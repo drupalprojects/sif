@@ -3,5 +3,7 @@ description = Provides entities for each SIF data object type.
 package = SIF
 core = 7.x
 
+files[] = controller.inc
+
 dependencies[] = entity
 dependencies[] = sif

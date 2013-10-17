@@ -21,12 +21,24 @@ function sif_ui_environments(){
     }
     $rows = array();
     foreach ($environments as $environment){
-      $row = array($environment->id);
-      $row[] = '<pre>' . htmlspecialchars(clean_xml($environment->xml)) . '</pre>';
+      $row = array();
+      $row[] = $environment->consumerName;
+      $row[] = $environment->solutionId;
+      $row[] = $environment->defaultZoneId;
+      $row[] = $environment->sessionToken;
+
+      $items = array();
+      foreach ($environment->infrastructureServices->infrastructureService as $s) {
+        $items[] = l($s->attributes()->name, (string) $s); //print_r($s,1);
+      }
+      $row[] = theme('item_list', array('items' => $items));
+      $row[] = $environment->id;
+
+      //$row[] = '<pre>' . htmlspecialchars(clean_xml($environment->xml)) . '</pre>';
       $rows[] = $row;
     }
   }
-  $header = array('id', 'xml');
+  $header = array('consumerName', 'solutionId', 'defaultZoneId', 'session_token', 'infrastructureServices', 'id');
 
   $build['environments'] = array(
     '#theme' => 'table',

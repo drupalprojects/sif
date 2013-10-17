@@ -8,7 +8,7 @@ function sif_data_object_entity_info() {
   $return = array(
     'sif_data_object' => array(
       'label' => t('SIF Data Object'),
-      'controller class' => 'EntityAPIController',
+      'controller class' => 'SifEntityAPIController',
       'base table' => 'sif_data_object',
       'uri callback' => 'sif_object_uri',
       'entity keys' => array(
