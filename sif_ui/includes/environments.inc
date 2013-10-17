@@ -33,12 +33,14 @@ function sif_ui_environments(){
       }
       $row[] = theme('item_list', array('items' => $items));
       $row[] = $environment->id;
+      $row[] = l(t('View XML'), "sif/$environment->id/xml") . ' | ' . l(t('Delete'), "sif/$environment->id/delete");
+
 
       //$row[] = '<pre>' . htmlspecialchars(clean_xml($environment->xml)) . '</pre>';
       $rows[] = $row;
     }
   }
-  $header = array('consumerName', 'solutionId', 'defaultZoneId', 'session_token', 'infrastructureServices', 'id');
+  $header = array('consumerName', 'solutionId', 'defaultZoneId', 'session_token', 'infrastructureServices', 'id', 'actions');
 
   $build['environments'] = array(
     '#theme' => 'table',

@@ -58,3 +58,39 @@ function sif_data_object_sif_data_object_types(){
     'student' => t('Student'),
   );
 }
+
+/**
+ * Delete Sif Object
+ */
+function sif_data_object_delete($sif_id, $delete_from_server = FALSE){
+
+  // First send a DELETE message to the server
+  if ($delete_from_server){
+    // POST this environment XML
+    $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
+    $url .= '/environments/environment';
+
+    $options = array(
+      'method' => 'POST',
+      'data' => $form_state['values']['xml'],
+      'headers' => array(
+        'Authorization' => sif_get_application_key(),
+        'Accept' => 'application/xml',
+        'Content-Type' => 'application/xml',
+      ),
+    );
+    $response = drupal_http_request($url, $options);
+
+    if ($response->code != "201"){
+      form_set_error('xml', t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
+    }
+    else {
+      form_set_value($form['xml'], $response->data, $form_state);
+    }
+
+  }
+
+    // Then, delete the local entity
+    //entity_delete('sif_data_object', $sif->id);
+
+}
