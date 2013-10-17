@@ -27,7 +27,7 @@ function sif_ui_menu() {
     'page arguments' => array('sif_settings_form'),
     'access arguments' => array('configure sif'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'includes/sif_ui.admin.inc',
+    'file' => 'includes/settings.inc',
   );
   $items['admin/sif/environments'] = array(
     'title' => 'Environments',
