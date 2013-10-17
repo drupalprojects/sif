@@ -11,7 +11,6 @@ function sif_data_object_entity_info() {
       'controller class' => 'EntityAPIController',
       'base table' => 'sif_data_object',
       'uri callback' => 'sif_object_uri',
-      'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'id',
         'bundle' => 'type',
