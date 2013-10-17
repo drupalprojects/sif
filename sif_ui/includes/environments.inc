@@ -162,6 +162,3 @@ function sif_environment_xml($consumerName, $solutionId){
 </environment>
 XML;
 }
-
-/**
- *
