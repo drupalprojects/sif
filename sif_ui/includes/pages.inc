@@ -72,17 +72,10 @@ function sif_object_delete_form($form, &$form_state, $sif) {
  * DELETE sif object form submission
  */
 function sif_object_delete_form_submit($form, &$form_state) {
-  if ($form_state['values']['confirm'] && $sif = entity_load('sif_data_object', $form_state['values']['id'])) {
-
+  if ($form_state['values']['confirm']) {
+    $sif = $form_state['sif_object'];
     // Delete the entity and possibly the object on the server.
-    sif_data_object_delete($sif->id, $form_state['values']['delete_from_server']);
-
-    $args = array(
-      '@type' => $sif->type,
-      '%title' => $sif->id,
-    );
-    watchdog('sif', 'SIF @type %title has been deleted from the local database.', $args);
-    drupal_set_message(t('SIF @type %title has been deleted from the local database.', $args));
+    sif_data_object_delete($form_state, $form_state['values']['delete_from_server']);
   }
   $form_state['redirect'] = '<front>';
 }

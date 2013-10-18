@@ -62,35 +62,52 @@ function sif_data_object_sif_data_object_types(){
 /**
  * Delete Sif Object
  */
-function sif_data_object_delete($sif_id, $delete_from_server = FALSE){
-
+function sif_data_object_delete(&$form_state, $delete_from_server = FALSE){
+  $sif_id = $form_state['values']['id'];
+  $sif_object = $form_state['sif_object'];
+  $success = FALSE;
   // First send a DELETE message to the server
   if ($delete_from_server){
     // POST this environment XML
     $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
-    $url .= '/environments/environment';
+    $url .= "/environments/$sif_id";
 
     $options = array(
-      'method' => 'POST',
-      'data' => $form_state['values']['xml'],
+      'method' => 'DELETE',
       'headers' => array(
-        'Authorization' => sif_get_application_key(),
+        'Authorization' => sif_get_application_key($sif_id),
         'Accept' => 'application/xml',
         'Content-Type' => 'application/xml',
       ),
     );
     $response = drupal_http_request($url, $options);
 
-    if ($response->code != "201"){
-      form_set_error('xml', t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
+    if ($response->code != "204"){
+      if (property_exists($response, 'data')) {
+        form_set_error('delete_from_server', t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
+      } else {
+        form_set_error('delete_from_server', t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
+      }
+    } else {
+      drupal_set_message(t('Successfully deleted from server'));
+      $success = TRUE;
     }
-    else {
-      form_set_value($form['xml'], $response->data, $form_state);
-    }
-
   }
-
+  if (!$delete_from_server || ($delete_from_server && $success)) {
     // Then, delete the local entity
-    //entity_delete('sif_data_object', $sif->id);
+    $default = variable_get('sif_default_environment_id');
+    if ($default == $sif_id) {
+      variable_set('sif_default_environment_id', '');
+    }
+    entity_delete('sif_data_object', $sif_id);
 
+    $args = array(
+      '@type' => $sif_object->type,
+      '%title' => $sif_object->id,
+    );
+    watchdog('sif', 'SIF @type %title has been deleted from the local database.', $args);
+    drupal_set_message(t('SIF @type %title has been deleted from the local database.', $args));
+  } else {
+    drupal_set_message(t('Unable to delete from server. Either uncheck this option, or try again later.'));
+  }
 }
