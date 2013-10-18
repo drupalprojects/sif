@@ -66,6 +66,7 @@ function sif_data_object_delete(&$form_state, $delete_from_server = FALSE){
   $sif_id = $form_state['values']['id'];
   $sif_object = $form_state['sif_object'];
   $success = FALSE;
+
   // First send a DELETE message to the server
   if ($delete_from_server){
     // POST this environment XML
@@ -75,7 +76,7 @@ function sif_data_object_delete(&$form_state, $delete_from_server = FALSE){
     $options = array(
       'method' => 'DELETE',
       'headers' => array(
-        'Authorization' => sif_get_application_key($sif_id),
+        'Authorization' => $sif_object->authorizationToken,
         'Accept' => 'application/xml',
         'Content-Type' => 'application/xml',
       ),

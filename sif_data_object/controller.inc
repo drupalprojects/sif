@@ -30,6 +30,9 @@ class SifEntityAPIController extends EntityAPIController {
             $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
           }
 
+          // Authorization key
+          $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
+
           break;
       }
     }

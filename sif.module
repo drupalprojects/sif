@@ -25,14 +25,13 @@ function sif_permission() {
 /**
  * Helper for generating our application key.
  */
-function sif_get_application_key($env_id = NULL) {
-  $token = NULL;
-  if (!$env_id) {
+function sif_get_application_key($token = NULL) {
+  if (!$token) {
     if (!$env_id = variable_get('sif_default_environment_id')) {
       $token = variable_get('sif_server_auth_token', 'new');
     }
   }
-  if (!$token) {
+  if (!$token && $env_id) {
     $entity = entity_load('sif_data_object', array($env_id));
     $token = $entity[$env_id]->sessionToken;
   }
