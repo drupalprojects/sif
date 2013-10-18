@@ -32,8 +32,12 @@ function sif_get_application_key($token = NULL) {
     }
   }
   if (!$token && $env_id) {
-    $entity = entity_load('sif_data_object', array($env_id));
-    $token = $entity[$env_id]->sessionToken;
+    $entities = entity_load('sif_data_object', array($env_id));
+    if (isset($entity[$env_id])){
+      $token = $entity[$env_id]->sessionToken;
+    } else {
+      $token = variable_get('sif_server_auth_token', 'new');
+    }
   }
   $secret = variable_get('sif_server_auth_secret', 'guest');
   return "Basic " . base64_encode($token . ':' . $secret);
