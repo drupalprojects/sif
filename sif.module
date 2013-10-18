@@ -25,8 +25,17 @@ function sif_permission() {
 /**
  * Helper for generating our application key.
  */
-function sif_get_application_key(){
-  $token = variable_get('sif_server_auth_token', 'new');
+function sif_get_application_key($env_id = NULL) {
+  $token = NULL;
+  if (!$env_id) {
+    if (!$env_id = variable_get('sif_default_environment_id')) {
+      $token = variable_get('sif_server_auth_token', 'new');
+    }
+  }
+  if (!$token) {
+    $entity = entity_load('sif_data_object', array($env_id));
+    $token = $entity[$env_id]->sessionToken;
+  }
   $secret = variable_get('sif_server_auth_secret', 'guest');
   return "Basic " . base64_encode($token . ':' . $secret);
 }
