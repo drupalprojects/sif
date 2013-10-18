@@ -93,14 +93,19 @@ function sif_data_object_delete(&$form_state, $delete_from_server = FALSE){
       $success = TRUE;
     }
   }
+
   if (!$delete_from_server || ($delete_from_server && $success)) {
-    // Then, delete the local entity
     $default = variable_get('sif_default_environment_id');
+
+    // Unset the default environment if we are deleting the current default.
     if ($default == $sif_id) {
       variable_set('sif_default_environment_id', '');
     }
+
+    // Then, delete the local entity
     entity_delete('sif_data_object', $sif_id);
 
+    // Report back success.
     $args = array(
       '@type' => $sif_object->type,
       '%title' => $sif_object->id,
@@ -108,6 +113,7 @@ function sif_data_object_delete(&$form_state, $delete_from_server = FALSE){
     watchdog('sif', 'SIF @type %title has been deleted from the local database.', $args);
     drupal_set_message(t('SIF @type %title has been deleted from the local database.', $args));
   } else {
+    // Report failure to delete from server. Don't delete entity so we can try again.
     drupal_set_message(t('Unable to delete from server. Either uncheck this option, or try again later.'));
   }
 }
