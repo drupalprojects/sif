@@ -38,7 +38,8 @@ function sif_ui_environments(){
       if ($environment->id == $default_env) {
         $row[] = t('DEFAULT');
       } else {
-        $row[] = drupal_render(drupal_get_form('sif_ui_default_set', $environment->id));
+        $form = drupal_get_form('sif_ui_default_set', $environment->id);
+        $row[] = drupal_render($form);
       }
       $row[] = l(t('View XML'), "sif/$environment->id/xml") . ' | ' . l(t('Delete'), "sif/$environment->id/delete");
 
