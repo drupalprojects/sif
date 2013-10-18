@@ -31,7 +31,7 @@ function sif_ui_environments(){
 
       $items = array();
       foreach ($environment->infrastructureServices as $name => $url) {
-        $items[] = l($name, $url);
+        $items[] = l($name, 'sif/' . $environment->id . '/service/' . urlencode($name) . '/view');
       }
       $row[] = theme('item_list', array('items' => $items));
       $row[] = $environment->id;

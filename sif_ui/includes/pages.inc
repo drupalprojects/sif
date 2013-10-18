@@ -79,3 +79,31 @@ function sif_object_delete_form_submit($form, &$form_state) {
   }
   $form_state['redirect'] = '<front>';
 }
+
+/**
+ * Service viewer
+ */
+function sif_service_view($sif, $name) {
+  $entity = entity_load('sif_data_object', array($sif));
+  $url = $entity[$sif]->infrastructureServices[$name];
+
+  $options = array(
+    'method' => 'GET',
+    'headers' => array(
+      'Authorization' => $entity[$sif]->authorizationToken,
+      'Accept' => 'application/xml',
+      'Content-Type' => 'application/xml',
+    ),
+  );
+  $response = drupal_http_request($url, $options);
+  if ($response->code != "200"){
+    if (property_exists($response, 'data')) {
+      drupal_set_message(t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
+    } else {
+      drupal_set_message(t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
+    }
+  } else {
+    return clean_xml($response->data, TRUE);
+  }
+  return t('Problem viewing sevice');;
+}
