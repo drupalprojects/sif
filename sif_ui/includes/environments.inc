@@ -14,13 +14,14 @@ function sif_ui_environments(){
     ->entityCondition('bundle', 'environment');
   $result = $query->execute();
 
+  $rows = array();
+
   if (isset($result['sif_data_object'])) {
     foreach ($result['sif_data_object'] as $object){
       $object_ids = array_keys($result['sif_data_object']);
       $environments = entity_load('sif_data_object', $object_ids);
     }
     $default_env = variable_get('sif_default_environment_id');
-    $rows = array();
     foreach ($environments as $environment){
       $row = array();
       $row[] = l($environment->consumerName, "sif/$environment->id");
@@ -111,9 +112,12 @@ function sif_ui_environment_create_validate($form, &$form_state) {
   $response = drupal_http_request($url, $options);
 
   if ($response->code != "201"){
-    form_set_error('xml', t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
-  }
-  else {
+    if (property_exists($response, 'data')) {
+      form_set_error('xml', t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
+    } else {
+      form_set_error('xml', t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
+    }
+  } else {
     form_set_value($form['xml'], $response->data, $form_state);
   }
 }
