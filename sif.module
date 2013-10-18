@@ -21,7 +21,6 @@ function sif_permission() {
   return $permissions;
 }
 
-
 /**
  * Helper for generating our application key.
  */
@@ -33,8 +32,8 @@ function sif_get_application_key($token = NULL) {
   }
   if (!$token && $env_id) {
     $entities = entity_load('sif_data_object', array($env_id));
-    if (isset($entity[$env_id])){
-      $token = $entity[$env_id]->sessionToken;
+    if (isset($entities[$env_id])){
+      $token = $entities[$env_id]->sessionToken;
     } else {
       $token = variable_get('sif_server_auth_token', 'new');
     }
@@ -42,7 +41,6 @@ function sif_get_application_key($token = NULL) {
   $secret = variable_get('sif_server_auth_secret', 'guest');
   return "Basic " . base64_encode($token . ':' . $secret);
 }
-
 
 /**
  * Helper to get human readable XML
