@@ -19,6 +19,7 @@ function sif_ui_environments(){
       $object_ids = array_keys($result['sif_data_object']);
       $environments = entity_load('sif_data_object', $object_ids);
     }
+    $default_env = variable_get('sif_default_environment_id');
     $rows = array();
     foreach ($environments as $environment){
       $row = array();
@@ -33,6 +34,11 @@ function sif_ui_environments(){
       }
       $row[] = theme('item_list', array('items' => $items));
       $row[] = $environment->id;
+      if ($environment->id == $default_env) {
+        $row[] = t('DEFAULT');
+      } else {
+        $row[] = drupal_render(drupal_get_form('sif_ui_default_set', $environment->id));
+      }
       $row[] = l(t('View XML'), "sif/$environment->id/xml") . ' | ' . l(t('Delete'), "sif/$environment->id/delete");
 
 
@@ -40,7 +46,7 @@ function sif_ui_environments(){
       $rows[] = $row;
     }
   }
-  $header = array('consumerName', 'solutionId', 'defaultZoneId', 'session_token', 'infrastructureServices', 'id', 'actions');
+  $header = array('consumerName', 'solutionId', 'defaultZoneId', 'session_token', 'infrastructureServices', 'id', 'default', 'actions');
 
   $build['environments'] = array(
     '#theme' => 'table',
@@ -133,6 +139,30 @@ function sif_ui_environment_create_submit($form, &$form_state) {
   } else {
     drupal_set_message(t('Environment Not Created! Something went wrong.'), 'error');
   }
+}
+
+/**
+ * Default environment form
+ */
+function sif_ui_default_set($form, &$form_state, $id) {
+  $form['id'] = array(
+    '#type' => 'hidden',
+    '#value' => $id,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Set Default'),
+  );
+  return $form;
+}
+
+/**
+ * Default environment form submit
+ */
+function sif_ui_default_set_submit($form, &$form_state) {
+  $form_state['redirect'] = 'admin/sif/environments';
+  variable_set('sif_default_environment_id', $form['id']['#value']);
+  drupal_set_message(t('Default Environment Updated!'));
 }
 
 /**
