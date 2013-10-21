@@ -109,21 +109,10 @@ function sif_ui_environment_create_validate($form, &$form_state) {
  */
 function sif_ui_environment_create_submit($form, &$form_state) {
   // Save Environment entity.
-  $environment = new SimpleXMLElement($form_state['values']['xml']);
-  $id = (string) $environment->attributes()->id;
-  $values = array(
-    'id' => $id,
-    'type' => 'environment',
-    'created' => time(),
-    'changed' => time(),
-    'xml' => $form_state['values']['xml'],
-  );
-  $environment_entity = entity_create('sif_data_object', $values);
-  if (entity_save('sif_data_object', $environment_entity)){
-    drupal_set_message(t('Environment Created!'));
+  $success = sif_store('environment', $form_state['values']['xml']);
+
+  if ($success){
     $form_state['redirect'] = 'admin/sif/environments';
-  } else {
-    drupal_set_message(t('Environment Not Created! Something went wrong.'), 'error');
   }
 }
 
