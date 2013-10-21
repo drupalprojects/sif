@@ -94,32 +94,13 @@ function sif_ui_environment_create(){
  * Create Environment validation: POST happens here.
  */
 function sif_ui_environment_create_validate($form, &$form_state) {
-
-  // POST this environment XML
-  $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
-  $url .= '/environments/environment';
-
   $xml = sif_environment_xml($form_state['values']['consumer_name'], $form_state['values']['solution_id']);
+  $results = sif_post('environment', $xml);
 
-  $options = array(
-    'method' => 'POST',
-    'data' => $xml,
-    'headers' => array(
-      'Authorization' => sif_get_application_key(),
-      'Accept' => 'application/xml',
-      'Content-Type' => 'application/xml',
-    ),
-  );
-  $response = drupal_http_request($url, $options);
-
-  if ($response->code != "201"){
-    if (property_exists($response, 'data')) {
-      form_set_error('xml', t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
-    } else {
-      form_set_error('xml', t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
-    }
+  if (!$results) {
+    form_set_error('xml', t('Error processing request. See above errors.'));
   } else {
-    form_set_value($form['xml'], $response->data, $form_state);
+    form_set_value($form['xml'], $results, $form_state);
   }
 }
 
