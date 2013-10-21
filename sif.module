@@ -165,3 +165,24 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
     return FALSE;
   }
 }
+
+
+function sif_store($type, $xml) {
+  $xml_object = new SimpleXMLElement($xml);
+  $id = (string) $xml_object->attributes()->id;
+  $values = array(
+    'id' => $id,
+    'type' => $type,
+    'created' => time(),
+    'changed' => time(),
+    'xml' => $xml,
+  );
+  $entity = entity_create('sif_data_object', $values);
+  if (entity_save('sif_data_object', $entity)){
+    drupal_set_message(t('Entity successfully created!'));
+    return TRUE;
+  } else {
+    drupal_set_message(t('Entity not created! Something went wrong.'), 'error');
+    return FALSE;
+  }
+}
