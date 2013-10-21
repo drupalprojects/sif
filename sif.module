@@ -56,3 +56,112 @@ function clean_xml($xml, $html_encode = FALSE){
     return $output;
   }
 }
+
+/**
+ * Generic function to GET a SIF object
+ * @param  string $type
+ * @param  string $id
+ * @param  string $environment
+ * @return string
+ */
+function sif_get($type, $id = NULL, $environment = NULL) {
+  $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
+  $url .= "/$type" . 's/';
+  if ($id){
+    $url .= $id;
+  }
+
+  if (!$environment){
+    $environment = variable_get('sif_default_environment_id');
+  }
+
+  if ($environment){
+    $entities = entity_load('sif_data_object', array($environment));
+    if (isset($entities[$environment])){
+      $token = $entities[$environment]->sessionToken;
+    }
+
+    $options = array(
+      'method' => 'GET',
+      'headers' => array(
+        'Authorization' => sif_get_application_key($token),
+        'Accept' => 'application/xml',
+        'Content-Type' => 'application/xml',
+      ),
+    );
+    $response = drupal_http_request($url, $options);
+
+    if ($response->code != "200"){
+      if (property_exists($response, 'data')) {
+        drupal_set_message(t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
+      } else {
+        drupal_set_message(t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
+      }
+      return FALSE;
+    } else {
+      return $response->data;
+    }
+  } else {
+    drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
+    return FALSE;
+  }
+}
+
+/**
+ * Generic function to POST a SIF object
+ * @param  string $type
+ * @param  string $xml
+ * @param  string $multi
+ * @param  string $environment
+ * @return string
+ */
+function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
+  $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
+  $url .= "/$type" . 's';
+  if (!$multi){
+    $url .= "/$type";
+  }
+
+  if ($type == 'environment'){
+    $environment = 'new';
+  }
+
+  if (!$environment) {
+    $environment = variable_get('sif_default_environment_id');
+  }
+
+  if ($environment){
+    $token = NULL;
+    if ($environment != 'new') {
+      $entities = entity_load('sif_data_object', array($environment));
+      if (isset($entities[$environment])){
+        $token = $entities[$environment]->sessionToken;
+      }
+    }
+
+    $options = array(
+      'method' => 'POST',
+      'data' => $xml,
+      'headers' => array(
+        'Authorization' => sif_get_application_key($token),
+        'Accept' => 'application/xml',
+        'Content-Type' => 'application/xml',
+      ),
+    );
+    $response = drupal_http_request($url, $options);
+
+    if ($response->code != "201"){
+      if (property_exists($response, 'data')) {
+        drupal_set_message(t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
+      } else {
+        drupal_set_message(t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
+      }
+      return FALSE;
+    } else {
+      return $response->data;
+    }
+  } else {
+    drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
+    return FALSE;
+  }
+}
