@@ -23,6 +23,7 @@ function sif_queues_page(){
       $row[] = $queue->messageCount;
       $row[] = $queue->pollingType;
       $row[] = format_date($queue->created) . '<br /><em>' . format_interval(time() - $queue->created) . ' ' . t('ago') . '</em>';
+      $row[] = format_date($queue->changed) . '<br /><em>' . format_interval(time() - $queue->changed) . ' ' . t('ago') . '</em>';
       $row[] = $queue->lastAccessed . '<br /><em>' . format_interval(time() - strtotime($queue->lastAccessed)) . ' ' . t('ago') . '</em>';
 
       $actions = array();
@@ -36,9 +37,10 @@ function sif_queues_page(){
   }
   $header = array(
     'name',
-    t('Message Count'),
+    t('Messages'),
     t('Polling Type'),
     t('Created'),
+    t('Updated'),
     t('Last Accessed'),
     t('Actions'),
   );

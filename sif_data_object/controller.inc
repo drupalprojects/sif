@@ -37,8 +37,17 @@ class SifEntityAPIController extends EntityAPIController {
    */
   public function create(array $values = array()) {
     // Add is_new property only if we don't have this entity yet.
-    $is_new = !db_query('SELECT id FROM {sif_data_object} WHERE id = :id', array(':id' => $values['id']))->fetchField();
-    $values += array('is_new' => $is_new);
+    $created = db_query('SELECT created FROM {sif_data_object} WHERE id = :id', array(':id' => $values['id']))->fetchField();
+    if ($created) {
+      $values['created'] = $created;
+      $values['changed'] = time();
+      $values['is_new'] = FALSE;
+    }
+    else {
+      $values['is_new'] = TRUE;
+      $values['created'] = time();
+      $values['changed'] = time();
+    }
     return parent::create($values);
   }
 

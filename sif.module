@@ -170,7 +170,7 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
 /**
  * Generic function to PUT a SIF object
  * @param  string $type
- * @param  string $xml 
+ * @param  string $xml
  * @param  string $id
  * @param  string $environment
  * @return string
@@ -222,7 +222,7 @@ function sif_put($type, $xml, $id = NULL, $environment = NULL) {
 /**
  * Generic function to DELETE a SIF object
  * @param  string $type
- * @param  string $xml 
+ * @param  string $xml
  * @param  string $id
  * @param  string $environment
  * @return string
@@ -283,8 +283,6 @@ function sif_store($type, $xml) {
   $values = array(
     'id' => $id,
     'type' => $type,
-    'created' => time(),
-    'changed' => time(),
     'xml' => $xml,
   );
   $entity = entity_create('sif_data_object', $values);
@@ -325,7 +323,7 @@ function sif_local_delete($type, $id){
  * Loads a SIF data object
  * @param  string $id ID of the object
  * @return mixed      Object on success, false on failure
- */ 
+ */
 function sif_load($id) {
   $entities = entity_load('sif_data_object', array($id));
   if (isset($entities[$id])) {
@@ -369,5 +367,3 @@ function sif_error_check(&$response, $type) {
     return $error;
   }
 }
-
-
