@@ -70,14 +70,20 @@ function sif_get($type, $id = NULL, $path = NULL, $environment = NULL) {
   if ($id){
     $url .= $id;
   }
-  if ($path){
+  if ($path) {
     $url .= '/' . $path;
   }
-  if (!$environment){
+
+  $queue = FALSE;
+  if ($type = 'queue') {
+    $queue = TRUE;
+  }
+
+  if (!$environment) {
     $environment = variable_get('sif_default_environment_id');
   }
 
-  if ($environment){
+  if ($environment) {
     $entities = entity_load('sif_data_object', array($environment));
     if (isset($entities[$environment])){
       $token = $entities[$environment]->sessionToken;
@@ -92,7 +98,7 @@ function sif_get($type, $id = NULL, $path = NULL, $environment = NULL) {
     );
     $response = drupal_http_request($url, $options);
 
-    if (sif_error_check($response, 'GET')) {
+    if (sif_error_check($response, 'GET', $queue)) {
       return FALSE;
     } else {
       if (property_exists($response, 'data')) {
@@ -339,24 +345,28 @@ function sif_load($id) {
  * @param  string $type     Type of request
  * @return mixed            The error associated with that code or false on an OK
  */
-function sif_error_check(&$response, $type) {
+function sif_error_check(&$response, $type, $queue = FALSE) {
   $statuses = array(
     '200' => 'OK',
     '201' => 'OK',
     '204' => 'OK',
   );
 
-  if (isset($statuses[$response->code])) {
-    return FALSE;
+  if ($queue && $response->code == '204') { // TODO: get rid of this cludginess
+    return TRUE;
   } else {
-    $error = $response->error;
-
-    if (property_exists($response, 'data')) {
-      drupal_set_message(t("$type unsuccessful: !message", array('!message' => strip_tags($response->data))));
+    if (isset($statuses[$response->code])) {
+      return FALSE;
     } else {
-      drupal_set_message(t("$type unsuccessful: code: !code, error: !error", array('!code' => strip_tags($response->code), '!error' => $error)));
+      $error = $response->error;
+
+      if (property_exists($response, 'data')) {
+        drupal_set_message(t("$type unsuccessful: !message", array('!message' => strip_tags($response->data))));
+      } else {
+        drupal_set_message(t("$type unsuccessful: code: !code, error: !error", array('!code' => strip_tags($response->code), '!error' => $error)));
+      }
+      
+      return $error;
     }
-    
-    return $error;
   }
 }
