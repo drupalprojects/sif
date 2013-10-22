@@ -27,14 +27,30 @@ function sif_ui_environments(){
       $row[] = l($environment->consumerName, "sif/$environment->id");
       $row[] = $environment->solutionId;
       $row[] = $environment->defaultZoneId;
-      $row[] = $environment->sessionToken;
+      //$row[] = $environment->sessionToken;
 
+      // Infrastructure Services
       $items = array();
       foreach ($environment->infrastructureServices as $name => $url) {
         $items[] = l($name, 'sif/' . $environment->id . '/service/' . urlencode($name) . '/view');
       }
       $row[] = theme('item_list', array('items' => $items));
-      $row[] = $environment->id;
+
+      // Provisioned Zones
+      $items = array();
+      foreach ($environment->provisionedZones[$environment->defaultZoneId]['services'] as $service_name => $service) {
+        $children = array();
+        foreach ($service['rights'] as $right => $status){
+          $children[] = "$right: $status";
+        }
+        $items[] = array(
+          'data' => l($service_name, 'sif/' . $environment->id . '/provisionedService/' . urlencode($service_name) . '/view'),
+          'children' => $children,
+        );
+      }
+      $row[] = theme('item_list', array('items' => $items));
+
+      //$row[] = $environment->id;
       if ($environment->id == $default_env) {
         $row[] = t('DEFAULT');
       } else {
@@ -48,7 +64,7 @@ function sif_ui_environments(){
       $rows[] = $row;
     }
   }
-  $header = array('consumerName', 'solutionId', 'defaultZoneId', 'session_token', 'infrastructureServices', 'id', 'default', 'actions');
+  $header = array('consumerName', 'solutionId', 'defaultZoneId', 'infrastructureServices', 'Rights', 'default', 'actions');
 
   $build['environments'] = array(
     '#theme' => 'table',
