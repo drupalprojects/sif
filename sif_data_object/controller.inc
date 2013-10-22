@@ -90,6 +90,27 @@ class SifEntityAPIController extends EntityAPIController {
       $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
     }
 
+    // Provisioned Zones and Rights
+    $entity->provisionedZones = array();
+    foreach ($entity->data->provisionedZones->provisionedZone as $s){
+      $id = (string) $s->attributes()->id;
+
+      // Array of Services
+      $entity->provisionedZones[$id] = array();
+      $entity->provisionedZones[$id]['services'] = array();
+
+      foreach ($s->services->service as $service) {
+        // Array of Rights
+        $service_name = (string) $service->attributes()->name;
+        $entity->provisionedZones[$id]['services'][$service_name] = array();
+        $entity->provisionedZones[$id]['services'][$service_name]['rights'] = array();
+        foreach ($service->rights->right as $right){
+          $right_type = (string) $right->attributes()->type;
+          $entity->provisionedZones[$id]['services'][$service_name]['rights'][$right_type] = (string) $right;
+        }
+      }
+    }
+
     // Authorization key
     $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
   }
