@@ -30,6 +30,7 @@ function sif_ui_environments(){
       $row[] = $environment->sessionToken;
 
       $items = array();
+      dsm($environment);
       foreach ($environment->infrastructureServices as $name => $url) {
         $items[] = l($name, 'sif/' . $environment->id . '/service/' . urlencode($name) . '/view');
       }

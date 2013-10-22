@@ -12,10 +12,16 @@ class SifEntityAPIController extends EntityAPIController {
    */
   public function load($ids = array(), $conditions = array()) {
     $entities = parent::load($ids, $conditions);
+    $types = sif_data_object_get_types();
     foreach ($entities as &$entity){
 
       // Give all entities a SimpleXML object
       $entity->data = new SimpleXMLElement($entity->xml);
+
+      // Load all desired properties
+      foreach ($types[$entity->type]['properties'] as $property){
+        $entity->{$property} = (string) $entity->data->{$property};
+      }
 
       // Look for helper function
       $method = "load_" . $entity->type;
@@ -30,11 +36,6 @@ class SifEntityAPIController extends EntityAPIController {
    * Load Environment
    */
   private function load_environment(&$entity, $ids = array(), $conditions = array()){
-    //String Properties
-    $properties = array('sessionToken', 'solutionId', 'defaultZoneId', 'consumerName');
-    foreach ($properties as $property){
-      $entity->{$property} = (string) $entity->data->{$property};
-    }
 
     // Infrastructure Services
     $entity->infrastructureServices = array();
@@ -44,17 +45,6 @@ class SifEntityAPIController extends EntityAPIController {
 
     // Authorization key
     $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
-  }
-
-  /**
-   * Load Environment
-   */
-  private function load_queue(&$entity, $ids = array(), $conditions = array()){
-    //String Properties
-    $properties = array('name', 'queueUri', 'idleTimeout', 'minWaitTime', 'messageCount');
-    foreach ($properties as $property){
-      $entity->{$property} = (string) $entity->data->{$property};
-    }
   }
 
   /**
