@@ -1,0 +1,8 @@
+name = SIF Queues
+description = Manage SIF Queues
+package = SIF
+core = 7.x
+configure = admin/sif/queues
+
+dependencies[] = sif
+dependencies[] = sif_data_object
