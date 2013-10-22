@@ -22,7 +22,7 @@ function sif_queues_page(){
       $row[] = l($queue->name, "sif/$queue->id");
       $row[] = $queue->id;
       $row[] = l(t('View XML'), "sif/$environment->id/xml") . ' | ' . l(t('Delete'), "sif/$environment->id/delete");
-      $row[] = '<pre>' . htmlspecialchars(clean_xml($queue->xml)) . '</pre>';
+      //$row[] = '<pre>' . htmlspecialchars(clean_xml($queue->xml)) . '</pre>';
       $rows[] = $row;
     }
   }
@@ -36,4 +36,75 @@ function sif_queues_page(){
   );
 
   return $build;
+}
+
+/**
+ * Create Queues Form
+ */
+function sif_queues_create(){
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#description' => t('Enter the name you would like to use for this queue.'),
+    '#required' => TRUE,
+  );
+  $form['type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Queue Type'),
+    '#description' => t('Choose what type of queue this will act as.'),
+    '#options' => array(
+      'IMMEDIATE_POLLING' => t('Immediate Polling'),
+      'LONG_POLLING' => t('Long Polling'),
+    ),
+    '#default_value' => 'IMMEDIATE_POLLING',
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#value' => t('POST Environment'),
+    '#type' => 'submit',
+  );
+
+  // Placeholder element for the validate function.
+  $form['xml'] = array(
+    '#type' => 'value',
+  );
+  return $form;
+}
+
+/**
+ * Create Environment validation: POST happens here.
+ */
+function sif_queues_create_validate($form, &$form_state) {
+  $xml = sif_queues_create_xml($form_state['values']['name'], $form_state['values']['type']);
+  $results = sif_post('queue', $xml);
+
+  if (!$results) {
+    form_set_error('xml', t('Error processing request. See above errors.'));
+  } else {
+    form_set_value($form['xml'], $results, $form_state);
+  }
+}
+
+/**
+ * Create Environment submit: entity_save() happens here.
+ */
+function sif_queues_create_submit($form, &$form_state) {
+  // Save Environment entity.
+  $success = sif_store('queue', $form_state['values']['xml']);
+
+  if ($success){
+    $form_state['redirect'] = 'admin/sif/queues';
+  }
+}
+
+
+/**
+ * Generate a new environment XML object for POSTing
+ */
+function sif_queues_create_xml($name, $type){
+  return <<<XML
+<queue type="$type">
+  <name>$name</name>
+</queue>
+XML;
 }
