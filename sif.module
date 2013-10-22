@@ -64,13 +64,15 @@ function clean_xml($xml, $html_encode = FALSE){
  * @param  string $environment
  * @return string
  */
-function sif_get($type, $id = NULL, $environment = NULL) {
+function sif_get($type, $id = NULL, $path = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
   $url .= "/$type" . 's/';
   if ($id){
     $url .= $id;
   }
-
+  if ($path){
+    $url .= '/' . $path;
+  }
   if (!$environment){
     $environment = variable_get('sif_default_environment_id');
   }
@@ -80,7 +82,6 @@ function sif_get($type, $id = NULL, $environment = NULL) {
     if (isset($entities[$environment])){
       $token = $entities[$environment]->sessionToken;
     }
-
     $options = array(
       'method' => 'GET',
       'headers' => array(
@@ -90,12 +91,11 @@ function sif_get($type, $id = NULL, $environment = NULL) {
       ),
     );
     $response = drupal_http_request($url, $options);
-
-    if ($response->code != "200"){
+    if ($response->code != "200" && $response->code != "204" ){
       if (property_exists($response, 'data')) {
-        drupal_set_message(t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
+        drupal_set_message(t('GET unsuccessful: !message', array('!message' => strip_tags($response->data))));
       } else {
-        drupal_set_message(t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
+        drupal_set_message(t('GET unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
       }
       return FALSE;
     } else {
