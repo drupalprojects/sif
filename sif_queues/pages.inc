@@ -61,7 +61,7 @@ function sif_queues_create(){
     '#required' => TRUE,
   );
   $form['submit'] = array(
-    '#value' => t('POST Qeueu'),
+    '#value' => t('POST Queue'),
     '#type' => 'submit',
   );
 
