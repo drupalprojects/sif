@@ -32,6 +32,34 @@ class SifEntityAPIController extends EntityAPIController {
     return $entities;
   }
 
+
+  /**
+   * Extends parent::save to allow setting of default environment.
+   */
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
+    $saved = parent::save($entity, $transaction);
+    if ($saved) {
+      // @TODO: move to post_save_TYPE() "hook"
+      switch ($entity->type){
+        case 'environment':
+          if (!variable_get('sif_default_environment_id')) {
+            $data = new SimpleXMLElement($entity->xml);
+            variable_set('sif_default_environment_id', (string) $data->attributes()->id);
+          }
+
+          break;
+      }
+    }
+    return $saved;
+  }
+
+  /**
+   *
+   * BUNDLE HOOKS
+   *
+   * load_TYPE()
+   * @TODO save_TYPE()
+   */
   /**
    * Load Environment
    */
@@ -45,24 +73,5 @@ class SifEntityAPIController extends EntityAPIController {
 
     // Authorization key
     $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
-  }
-
-  /**
-   * Extends parent::save to allow setting of default environment.
-   */
-  public function save($entity, DatabaseTransaction $transaction = NULL) {
-    $saved = parent::save($entity, $transaction);
-    if ($saved) {
-      switch ($entity->type){
-        case 'environment':
-          if (!variable_get('sif_default_environment_id')) {
-            $data = new SimpleXMLElement($entity->xml);
-            variable_set('sif_default_environment_id', (string) $data->attributes()->id);
-          }
-
-          break;
-      }
-    }
-    return $saved;
   }
 }
