@@ -140,5 +140,9 @@ function sif_queues_get_submit(){
   $queues =  new SimpleXMLElement($xml);
   foreach ($queues->queue as $i => $queue){
     sif_store('queue',  $queue->asXML());
+    $queue_found = TRUE;
+  }
+  if (!isset($queue_found)){
+    drupal_set_message(t('No queues were found.'));
   }
 }
