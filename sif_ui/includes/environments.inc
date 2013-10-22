@@ -112,6 +112,11 @@ function sif_ui_environment_create_submit($form, &$form_state) {
   $success = sif_store('environment', $form_state['values']['xml']);
 
   if ($success){
+    //$sif_object = sif_data_object_load();
+    //$default_env = variable_get('sif_default_environment_id');
+    //if (!$default_env) {
+    //  variable_set('sif_default_environment_id', )
+    //}
     $form_state['redirect'] = 'admin/sif/environments';
   }
 }
