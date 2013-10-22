@@ -18,16 +18,13 @@ function sif_queues_page(){
       $queues = entity_load('sif_data_object', $object_ids);
     }
     foreach ($queues as $queue){
-      $time_ago = time() - strtotime($queue->lastAccessed);
-
-
       $row = array();
       $row[] = l($queue->name, "sif/$queue->id");
       $row[] = $queue->messageCount;
-      $row[] = format_date($queue->created);
-      $row[] = $queue->lastAccessed . '<br /><em>' . format_interval($time_ago) . ' ' . t('ago') . '</em>';
-      $row[] = $queue->id;
-      $row[] = $queue->queueUri;
+      $row[] = $queue->pollingType;
+      $row[] = format_date($queue->created) . '<br /><em>' . format_interval(time() - $queue->created) . ' ' . t('ago') . '</em>';
+      $row[] = format_date($queue->changed) . '<br /><em>' . format_interval(time() - $queue->changed) . ' ' . t('ago') . '</em>';
+      $row[] = $queue->lastAccessed . '<br /><em>' . format_interval(time() - strtotime($queue->lastAccessed)) . ' ' . t('ago') . '</em>';
 
       $actions = array();
       $actions[] = l(t('View XML'), "sif/$queue->id/xml");
@@ -40,11 +37,11 @@ function sif_queues_page(){
   }
   $header = array(
     'name',
-    t('Message Count'),
+    t('Messages'),
+    t('Polling Type'),
     t('Created'),
+    t('Updated'),
     t('Last Accessed'),
-    'id',
-    'queueUri',
     t('Actions'),
   );
 
