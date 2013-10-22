@@ -144,5 +144,6 @@ function sif_queues_get_submit(){
   }
   if (!isset($queue_found)){
     drupal_set_message(t('No queues were found.'));
+    drupal_goto('admin/sif/queues');
   }
 }
