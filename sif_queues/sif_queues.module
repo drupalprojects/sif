@@ -27,7 +27,7 @@ function sif_queues_menu() {
     'file' => 'pages.inc',
   );
   $items['admin/sif/queues/get'] = array(
-    'title' => 'Get Queues',
+    'title' => 'Get or Update Queues',
     'description' => 'Load all queues from the SIF server.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sif_queues_get'),

@@ -22,7 +22,7 @@ function sif_queues_page(){
       $row[] = l($queue->name, "sif/$queue->id");
       $row[] = $queue->id;
       $row[] = $queue->queueUri;
-      $row[] = l(t('View XML'), "sif/$queue->id/xml") . ' | ' . l(t('Delete'), "sif/$queue->id/delete");
+      $row[] = l(t('View XML'), "sif/$queue->id/xml") . ' | ' . l(t('Delete'), "sif/$queue->id/delete", array('query' => array('destination' => 'admin/sif/queues')));
       //$row[] = '<pre>' . htmlspecialchars(clean_xml($queue->xml)) . '</pre>';
       $rows[] = $row;
     }
@@ -144,6 +144,6 @@ function sif_queues_get_submit(){
   }
   if (!isset($queue_found)){
     drupal_set_message(t('No queues were found.'));
-    drupal_goto('admin/sif/queues');
   }
+  drupal_goto('admin/sif/queues');
 }
