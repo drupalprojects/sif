@@ -91,15 +91,16 @@ function sif_get($type, $id = NULL, $path = NULL, $environment = NULL) {
       ),
     );
     $response = drupal_http_request($url, $options);
-    if ($response->code != "200" && $response->code != "204" ){
-      if (property_exists($response, 'data')) {
-        drupal_set_message(t('GET unsuccessful: !message', array('!message' => strip_tags($response->data))));
-      } else {
-        drupal_set_message(t('GET unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
-      }
+
+    if (sif_error_check($response, 'GET')) {
       return FALSE;
     } else {
-      return $response->data;
+      if (property_exists($response, 'data')) {
+        if ($response->data) {
+          return $response->data;
+        }
+      }
+      return TRUE;
     }
   } else {
     drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
@@ -122,7 +123,7 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
     $url .= "/$type";
   }
 
-  if ($type == 'environment'){
+  if ($type == 'environment') {
     $environment = 'new';
   }
 
@@ -130,11 +131,11 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
     $environment = variable_get('sif_default_environment_id');
   }
 
-  if ($environment){
+  if ($environment) {
     $token = NULL;
     if ($environment != 'new') {
       $entities = entity_load('sif_data_object', array($environment));
-      if (isset($entities[$environment])){
+      if (isset($entities[$environment])) {
         $token = $entities[$environment]->sessionToken;
       }
     }
@@ -150,15 +151,15 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
     );
     $response = drupal_http_request($url, $options);
 
-    if ($response->code != "201"){
-      if (property_exists($response, 'data')) {
-        drupal_set_message(t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
-      } else {
-        drupal_set_message(t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
-      }
+    if (sif_error_check($response, 'POST')) {
       return FALSE;
     } else {
-      return $response->data;
+      if (property_exists($response, 'data')) {
+        if ($response->data) {
+          return $response->data;
+        }
+      }
+      return TRUE;
     }
   } else {
     drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
@@ -166,7 +167,116 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
   }
 }
 
+/**
+ * Generic function to PUT a SIF object
+ * @param  string $type
+ * @param  string $xml 
+ * @param  string $id
+ * @param  string $environment
+ * @return string
+ */
+function sif_put($type, $xml, $id = NULL, $environment = NULL) {
+  $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
+  $url .= "/$type" . 's/';
+  if ($id){
+    $url .= $id;
+  }
 
+  if (!$environment) {
+    $environment = variable_get('sif_default_environment_id');
+  }
+
+  if ($environment) {
+    $entities = entity_load('sif_data_object', array($environment));
+    if (isset($entities[$environment])) {
+      $token = $entities[$environment]->sessionToken;
+    }
+
+    $options = array(
+      'method' => 'PUT',
+      'data' => $xml,
+      'headers' => array(
+        'Authorization' => sif_get_application_key($token),
+        'Accept' => 'application/xml',
+        'Content-Type' => 'application/xml',
+      ),
+    );
+    $response = drupal_http_request($url, $options);
+
+    if (sif_error_check($response, 'PUT')) {
+      return FALSE;
+    } else {
+      if (property_exists($response, 'data')) {
+        if ($response->data) {
+          return $response->data;
+        }
+      }
+      return TRUE;
+    }
+  } else {
+    drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
+    return FALSE;
+  }
+}
+
+/**
+ * Generic function to DELETE a SIF object
+ * @param  string $type
+ * @param  string $xml 
+ * @param  string $id
+ * @param  string $environment
+ * @return string
+ */
+function sif_delete($type, $xml = NULL, $id = NULL, $environment = NULL) {
+  $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
+  $url .= "/$type" . 's/';
+  if ($id) {
+    $url .= $id;
+  }
+
+  if (!$environment) {
+    $environment = variable_get('sif_default_environment_id');
+  }
+
+  if ($environment) {
+    $env_object = sif_load($environment);
+    if ($env_object) {
+      $token = $env_object->sessionToken;
+    } // TODO: add checking for a valid token
+
+    $options = array(
+      'method' => 'DELETE',
+      'data' => $xml,
+      'headers' => array(
+        'Authorization' => sif_get_application_key($token),
+        'Accept' => 'application/xml',
+        'Content-Type' => 'application/xml',
+      ),
+    );
+    $response = drupal_http_request($url, $options);
+
+    if (sif_error_check($response, 'DELETE')){
+      return FALSE;
+    } else {
+      if (property_exists($response, 'data')) {
+        if ($response->data) {
+          return $response->data;
+        }
+      }
+      return TRUE;
+    }
+  } else {
+    drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
+    return FALSE;
+  }
+}
+
+/**
+ * Store a SIF data object as an entity
+ * @param  string $type Type of data object
+ * @param  string $xml  The XML representing the object
+ * @return boolean      True on success, false on failure
+ */
 function sif_store($type, $xml) {
   $xml_object = new SimpleXMLElement($xml);
   $id = (string) $xml_object->attributes()->id;
@@ -186,3 +296,78 @@ function sif_store($type, $xml) {
     return FALSE;
   }
 }
+
+/**
+ * Delete a SIF data object stored as an entity
+ * @param  string $type The type of object
+ * @param  string $id   The id of the object
+ * @return boolean      True on success, false on failure
+ */
+function sif_local_delete($type, $id){
+  $args = array(
+    '@type' => $type,
+    '%title' => $id,
+  );
+  entity_delete('sif_data_object', $id);
+  if (!sif_load($id)) {
+    // Report back success.
+    watchdog('sif', 'SIF @type %title has been deleted from the local database.', $args);
+    drupal_set_message(t('SIF @type %title has been deleted from the local database.', $args));
+    return TRUE;
+  } else {
+    watchdog('sif', 'SIF @type %title has NOT been deleted from the local database.', $args, WATCHDOG_ERROR);
+    drupal_set_message(t('SIF @type %title has NOT been deleted from the local database.', $args), 'error');
+    return FALSE;
+  }
+}
+
+/**
+ * Loads a SIF data object
+ * @param  string $id ID of the object
+ * @return mixed      Object on success, false on failure
+ */ 
+function sif_load($id) {
+  $entities = entity_load('sif_data_object', array($id));
+  if (isset($entities[$id])) {
+    return $entities[$id];
+  } else {
+    return FALSE;
+  }
+}
+
+/**
+ * Checks the error code for a correct error message
+ * @param  string $response Response object
+ * @param  string $type     Type of request
+ * @return mixed            The error associated with that code or false on an OK
+ */
+function sif_error_check(&$response, $type) {
+  $statuses = array(
+    '200' => 'OK',
+    '201' => 'OK',
+    '204' => 'OK',
+    '304' => 'Not modified. You must provide the If-None-Match header parameter for this code to be returned',
+    '400' => 'Bad Request. Malformed request in a header, XML or JSON input',
+    '401' => 'Unauthorized. Authorization Token missing or expired',
+    '404' => 'Id or object not found',
+    '409' => 'Conflict requests such as creating an environment for a Consumer Key that already exists'
+  );
+
+  if ($statuses[$response->code] = 'OK') {
+    return FALSE;
+  } else {
+    if (isset($statuses[$response->code])) {
+      $error = $statuses[$response->code];
+    } else {
+      $error = $response->error;
+    }
+    if (property_exists($response, 'data')) {
+      drupal_set_message(t("$type unsuccessful: !message", array('!message' => strip_tags($response->data))));
+    } else {
+      drupal_set_message(t("$type unsuccessful: code: !code, error: !error", array('!code' => strip_tags($response->code), '!error' => $error)));
+    }
+    return $error;
+  }
+}
+
+
