@@ -16,27 +16,45 @@ class SifEntityAPIController extends EntityAPIController {
 
       // Give all entities a SimpleXML object
       $entity->data = new SimpleXMLElement($entity->xml);
-      switch ($entity->type){
-        case 'environment':
-          //String Properties
-          $properties = array('sessionToken', 'solutionId', 'defaultZoneId', 'consumerName');
-          foreach ($properties as $property){
-            $entity->{$property} = (string) $entity->data->{$property};
-          }
 
-          // Infrastructure Services
-          $entity->infrastructureServices = array();
-          foreach ($entity->data->infrastructureServices->infrastructureService as $s){
-            $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
-          }
-
-          // Authorization key
-          $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
-
-          break;
+      // Look for helper function
+      $method = "load_" . $entity->type;
+      if (method_exists('SifEntityAPIController', $method)){
+        $this->{$method}($entity, $ids, $conditions);
       }
     }
     return $entities;
+  }
+
+  /**
+   * Load Environment
+   */
+  private function load_environment(&$entity, $ids = array(), $conditions = array()){
+    //String Properties
+    $properties = array('sessionToken', 'solutionId', 'defaultZoneId', 'consumerName');
+    foreach ($properties as $property){
+      $entity->{$property} = (string) $entity->data->{$property};
+    }
+
+    // Infrastructure Services
+    $entity->infrastructureServices = array();
+    foreach ($entity->data->infrastructureServices->infrastructureService as $s){
+      $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
+    }
+
+    // Authorization key
+    $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
+  }
+
+  /**
+   * Load Environment
+   */
+  private function load_queue(&$entity, $ids = array(), $conditions = array()){
+    //String Properties
+    $properties = array('name', 'queueUri', 'idleTimeout', 'minWaitTime', 'messageCount');
+    foreach ($properties as $property){
+      $entity->{$property} = (string) $entity->data->{$property};
+    }
   }
 
   /**
