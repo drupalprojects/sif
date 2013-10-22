@@ -21,12 +21,13 @@ function sif_queues_page(){
       $row = array();
       $row[] = l($queue->name, "sif/$queue->id");
       $row[] = $queue->id;
-      $row[] = l(t('View XML'), "sif/$environment->id/xml") . ' | ' . l(t('Delete'), "sif/$environment->id/delete");
+      $row[] = $queue->queueUri;
+      $row[] = l(t('View XML'), "sif/$queue->id/xml") . ' | ' . l(t('Delete'), "sif/$queue->id/delete");
       //$row[] = '<pre>' . htmlspecialchars(clean_xml($queue->xml)) . '</pre>';
       $rows[] = $row;
     }
   }
-  $header = array('name', 'id', 'actions');
+  $header = array('name', 'id', 'queueUri', 'actions');
 
   $build['queues'] = array(
     '#theme' => 'table',
@@ -60,7 +61,7 @@ function sif_queues_create(){
     '#required' => TRUE,
   );
   $form['submit'] = array(
-    '#value' => t('POST Environment'),
+    '#value' => t('POST Qeueu'),
     '#type' => 'submit',
   );
 
