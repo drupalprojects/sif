@@ -74,7 +74,22 @@ function sif_object_delete_form($form, &$form_state, $sif) {
 function sif_object_delete_form_validate($form, &$form_state) {
   if ($form_state['values']['confirm'] && $form_state['values']['delete_from_server']) {
     // Delete the object on the server.
-    sif_data_object_server_delete($form_state);
+    $default = variable_get('sif_default_environment_id');
+    $sif_id = $form_state['values']['id'];
+    $sif_object = $form_state['sif_object'];
+    $type = $sif_object->type;
+
+    if ($response = sif_delete($type, NULL, $sif_id)) {
+      if ($type == 'environment') {
+        // Unset the default environment if we are deleting the current default.
+        if ($default == $sif_id) {
+          variable_set('sif_default_environment_id', '');
+        }
+      }
+      drupal_set_message(t('Successfully deleted from server'));
+    } else {
+      form_set_error('delete_from_server', t('Unable to delete from server. See above error'));
+    }
   }
 }
 
@@ -82,9 +97,11 @@ function sif_object_delete_form_validate($form, &$form_state) {
  * DELETE sif object form submission
  */
 function sif_object_delete_form_submit($form, &$form_state) {
+  $sif_id = $form_state['values']['id'];
+  $sif_object = $form_state['sif_object'];
   if ($form_state['values']['confirm']) {
     // Delete the entity
-    sif_data_object_delete($form_state, $form_state['values']['delete_from_server']);
+    sif_local_delete($sif_object->type, $sif_object->id);
   }
   $form_state['redirect'] = '<front>';
 }
