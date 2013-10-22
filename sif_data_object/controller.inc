@@ -12,31 +12,34 @@ class SifEntityAPIController extends EntityAPIController {
    */
   public function load($ids = array(), $conditions = array()) {
     $entities = parent::load($ids, $conditions);
+    $types = sif_data_object_get_types();
     foreach ($entities as &$entity){
 
       // Give all entities a SimpleXML object
       $entity->data = new SimpleXMLElement($entity->xml);
-      switch ($entity->type){
-        case 'environment':
-          //String Properties
-          $properties = array('sessionToken', 'solutionId', 'defaultZoneId', 'consumerName');
-          foreach ($properties as $property){
-            $entity->{$property} = (string) $entity->data->{$property};
-          }
 
-          // Infrastructure Services
-          $entity->infrastructureServices = array();
-          foreach ($entity->data->infrastructureServices->infrastructureService as $s){
-            $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
-          }
+      // Load all desired properties
+      foreach ($types[$entity->type]['properties'] as $property){
+        $entity->{$property} = (string) $entity->data->{$property};
+      }
 
-          // Authorization key
-          $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
-
-          break;
+      // Look for helper function
+      $method = "load_" . $entity->type;
+      if (method_exists('SifEntityAPIController', $method)){
+        $this->{$method}($entity, $ids, $conditions);
       }
     }
     return $entities;
+  }
+
+  /**
+   * A clone of EntityAPIController::create
+   */
+  public function create(array $values = array()) {
+    // Add is_new property only if we don't have this entity yet.
+    $is_new = !db_query('SELECT id FROM {sif_data_object} WHERE id = :id', array(':id' => $values['id']))->fetchField();
+    $values += array('is_new' => $is_new);
+    return parent::create($values);
   }
 
   /**
@@ -45,6 +48,7 @@ class SifEntityAPIController extends EntityAPIController {
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $saved = parent::save($entity, $transaction);
     if ($saved) {
+      // @TODO: move to post_save_TYPE() "hook"
       switch ($entity->type){
         case 'environment':
           if (!variable_get('sif_default_environment_id')) {
@@ -56,5 +60,27 @@ class SifEntityAPIController extends EntityAPIController {
       }
     }
     return $saved;
+  }
+
+  /**
+   *
+   * BUNDLE HOOKS
+   *
+   * load_TYPE()
+   * @TODO save_TYPE()
+   */
+  /**
+   * Load Environment
+   */
+  private function load_environment(&$entity, $ids = array(), $conditions = array()){
+
+    // Infrastructure Services
+    $entity->infrastructureServices = array();
+    foreach ($entity->data->infrastructureServices->infrastructureService as $s){
+      $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
+    }
+
+    // Authorization key
+    $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
   }
 }

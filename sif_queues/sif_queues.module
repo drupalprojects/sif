@@ -1,0 +1,40 @@
+<?php
+/**
+ * @file
+ * sif_queues.module
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function sif_queues_menu() {
+  $items = array();
+  $items['admin/sif/queues'] = array(
+    'title' => 'Queues',
+    'description' => 'Create and manage SIF queues.',
+    'page callback' => 'sif_queues_page',
+    'access arguments' => array('configure sif'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'pages.inc',
+  );
+  $items['admin/sif/queues/create'] = array(
+    'title' => 'Create Queue',
+    'description' => 'Create a new queue.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_queues_create'),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'pages.inc',
+  );
+  $items['admin/sif/queues/get'] = array(
+    'title' => 'Get or Update Queues',
+    'description' => 'Load all queues from the SIF server.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_queues_get'),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'pages.inc',
+  );
+  return $items;
+}
+
