@@ -69,6 +69,7 @@ class SifEntityAPIController extends EntityAPIController {
    * load_TYPE()
    * @TODO save_TYPE()
    */
+
   /**
    * Load Environment
    */
@@ -83,4 +84,12 @@ class SifEntityAPIController extends EntityAPIController {
     // Authorization key
     $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
   }
+
+  /**
+   * Load Environment
+   */
+  private function load_queue(&$entity, $ids = array(), $conditions = array()){
+    $entity->pollingType = $entity->data->attributes()->type;
+  }
+
 }
