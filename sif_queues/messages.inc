@@ -26,7 +26,7 @@ function sif_queues_get_messages_submit(){
   $messages = sif_get('queue', $id, "messages");
 
   if (empty($messages)){
-    drupal_set_message('There were no messages in the queue.');
+    drupal_set_message('There were no messages in the queue.', 'notice');
   } else {
     drupal_set_message($messages);
   }
