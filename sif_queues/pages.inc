@@ -109,3 +109,36 @@ function sif_queues_create_xml($name, $type){
 </queue>
 XML;
 }
+
+
+/**
+ * Get Queues Form
+ */
+function sif_queues_get(){
+  $form['note'] = array(
+    '#type' => 'markup',
+    '#markup' => '<p>' . t('Load all queues from the server.  This will update any existing queues as well.') . '</p>',
+  );
+  $form['submit'] = array(
+    '#value' => t('GET Queues'),
+    '#type' => 'submit',
+  );
+
+  // Placeholder element for the validate function.
+  $form['xml'] = array(
+    '#type' => 'value',
+  );
+  return $form;
+}
+
+
+/**
+ * Get Queues Form
+ */
+function sif_queues_get_submit(){
+  $xml = sif_get('queue');
+  $queues =  new SimpleXMLElement($xml);
+  foreach ($queues->queue as $i => $queue){
+    sif_store('queue',  $queue->asXML());
+  }
+}
