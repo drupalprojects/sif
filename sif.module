@@ -346,26 +346,19 @@ function sif_error_check(&$response, $type) {
     '200' => 'OK',
     '201' => 'OK',
     '204' => 'OK',
-    '304' => 'Not modified. You must provide the If-None-Match header parameter for this code to be returned',
-    '400' => 'Bad Request. Malformed request in a header, XML or JSON input',
-    '401' => 'Unauthorized. Authorization Token missing or expired',
-    '404' => 'Id or object not found',
-    '409' => 'Conflict requests such as creating an environment for a Consumer Key that already exists'
   );
 
-  if ($statuses[$response->code] = 'OK') {
+  if (isset($statuses[$response->code])) {
     return FALSE;
   } else {
-    if (isset($statuses[$response->code])) {
-      $error = $statuses[$response->code];
-    } else {
-      $error = $response->error;
-    }
+    $error = $response->error;
+
     if (property_exists($response, 'data')) {
       drupal_set_message(t("$type unsuccessful: !message", array('!message' => strip_tags($response->data))));
     } else {
       drupal_set_message(t("$type unsuccessful: code: !code, error: !error", array('!code' => strip_tags($response->code), '!error' => $error)));
     }
+    
     return $error;
   }
 }
