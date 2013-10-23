@@ -69,19 +69,24 @@ function clean_xml($xml, $html_encode = FALSE){
  *   The page number of the results to query.
  * @param  int    $per_page
  *   The number of results to show per page.
+ * @param  string $zone 
+ *   The zone to use. Default used if not set.
  * @param  string $environment
  *   The environment to query within (uses default otherwise).
  * @return mixed          
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL, $environment = NULL) {
+function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL, $zone = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
-  $url .= "/$type" . 's/';
+  $url .= "/$type" . 's';
   if ($id){
-    $url .= $id;
+    $url .= "/$id";
   }
   if ($path) {
-    $url .= '/' . $path;
+    $url .= "/$path";
+  }
+  if ($zone) {
+    $url .= ";zoneId=$zone";
   }
   if ($page) {
     $url .= "?page=$page";
@@ -139,16 +144,21 @@ function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL
  *   The XML for the query.
  * @param  bool   $multi
  *   True if this is a query for multiple objects.
+ * @param  string $zone 
+ *   The zone to use. Default used if not set.
  * @param  string $environment
  *   The environment to query within (uses default otherwise).
  * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
+function sif_post($type, $xml = NULL, $multi = FALSE, $zone = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
   $url .= "/$type" . 's';
   if (!$multi){
     $url .= "/$type";
+  }
+  if ($zone) {
+    $url .= ";zoneId=$zone";
   }
 
   if ($type == 'environment') {
@@ -204,16 +214,21 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
  *   The XML for the query.
  * @param  string $id
  *   The ID of the object to query for.
+ * @param  string $zone 
+ *   The zone to use. Default used if not set.
  * @param  string $environment
  *   The environment to query within (uses default otherwise).
  * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_put($type, $xml, $id = NULL, $environment = NULL) {
+function sif_put($type, $xml, $id = NULL, $zone = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
-  $url .= "/$type" . 's/';
+  $url .= "/$type" . 's';
   if ($id){
-    $url .= $id;
+    $url .= "/$id";
+  }
+  if ($zone) {
+    $url .= ";zoneId=$zone";
   }
 
   if (!$environment) {
@@ -262,18 +277,23 @@ function sif_put($type, $xml, $id = NULL, $environment = NULL) {
  *   The XML for the query.
  * @param  string $id
  *   The ID of the object to query for.
+ * @param  string $zone 
+ *   The zone to use. Default used if not set.
  * @param  string $environment
  *   The environment to query within (uses default otherwise).
  * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_delete($type, $xml = NULL, $id = NULL, $environment = NULL) {
+function sif_delete($type, $xml = NULL, $id = NULL, $zone = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
-  $url .= "/$type" . 's/';
+  $url .= "/$type" . 's';
   if ($id) {
-    $url .= $id;
+    $url .= "/$id";
   }
-
+  if ($zone) {
+    $url .= ";zoneId=$zone";
+  }
+  
   if (!$environment) {
     $environment = variable_get('sif_default_environment_id');
   }
