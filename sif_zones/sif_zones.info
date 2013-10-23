@@ -1,0 +1,8 @@
+name = SIF Zones
+description = Manage SIF Zones
+package = SIF
+core = 7.x
+configure = admin/sif/zones
+
+dependencies[] = sif
+dependencies[] = sif_data_object

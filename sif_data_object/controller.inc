@@ -116,10 +116,21 @@ class SifEntityAPIController extends EntityAPIController {
   }
 
   /**
-   * Load Environment
+   * Load Queue
    */
   private function load_queue(&$entity, $ids = array(), $conditions = array()){
     $entity->pollingType = $entity->data->attributes()->type;
   }
 
+  /**
+   * Load Zone
+   */
+  private function load_zone(&$entity, $ids = array(), $conditions = array()) {
+    $entity->zone_properties = array();
+    if (property_exists($entity->data, 'properties')) {
+      foreach ($entity->data->properties->property as $property) {
+        $entity->zone_properties[(string) $property->attributes()->name] = (string) $property;
+      }
+    }
+  }
 }

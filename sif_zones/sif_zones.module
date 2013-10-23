@@ -1,0 +1,30 @@
+<?php
+/**
+ * @file
+ * sif_queues.module
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function sif_zones_menu() {
+  $items = array();
+  $items['admin/sif/zones'] = array(
+    'title' => 'Zones',
+    'description' => 'Get and manage SIF zones.',
+    'page callback' => 'sif_zones_page',
+    'access arguments' => array('configure sif'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'pages.inc',
+  );
+  $items['admin/sif/zones/get'] = array(
+    'title' => 'Get or Update Zones',
+    'description' => 'Load all zones from the SIF server.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_zones_get'),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'pages.inc',
+  );
+  return $items;
+}
