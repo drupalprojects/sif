@@ -45,6 +45,10 @@ function sif_settings_form($form, &$form_state) {
     '#default_value' => variable_get('sif_connection_logging', 0),
     '#required' => FALSE,
   );
+  if (!module_exists('devel')) {
+    $form['sif_connection_logging']['#disabled'] = TRUE;
+    $form['sif_connection_logging']['#description'] = t('The devel module is required for this feature.');
+  }
   return system_settings_form($form);
 }
 

@@ -383,7 +383,7 @@ function sif_error_check(&$response, $type, $queue = FALSE) {
  */
 function sif_log($options, &$response) {
   $log_setting = variable_get('sif_connection_logging');
-  if ($log_setting) {
+  if ($log_setting && module_exists('devel')) {
     $args = array();
 
     $args['!options'] = dpr($options, TRUE);
