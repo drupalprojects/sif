@@ -60,9 +60,19 @@ function clean_xml($xml, $html_encode = FALSE){
 /**
  * Generic function to GET a SIF object
  * @param  string $type
+ *   Object type we are querying.
  * @param  string $id
+ *   The ID of the object to query for.
+ * @param  string $path
+ *   Additional path (needed for queues).
+ * @param  int    $page
+ *   The page number of the results to query.
+ * @param  int    $per_page
+ *   The number of results to show per page.
  * @param  string $environment
- * @return string
+ *   The environment to query within (uses default otherwise).
+ * @return mixed          
+ *   False on error or no more messages in queue. TRUE or data on success.
  */
 function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
@@ -124,10 +134,15 @@ function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL
 /**
  * Generic function to POST a SIF object
  * @param  string $type
+ *   Object type we are querying.
  * @param  string $xml
- * @param  string $multi
+ *   The XML for the query.
+ * @param  bool   $multi
+ *   True if this is a query for multiple objects.
  * @param  string $environment
- * @return string
+ *   The environment to query within (uses default otherwise).
+ * @return mixed
+ *   False on error or no more messages in queue. TRUE or data on success.
  */
 function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
@@ -184,10 +199,15 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
 /**
  * Generic function to PUT a SIF object
  * @param  string $type
+ *   Object type we are querying.
  * @param  string $xml
+ *   The XML for the query.
  * @param  string $id
+ *   The ID of the object to query for.
  * @param  string $environment
- * @return string
+ *   The environment to query within (uses default otherwise).
+ * @return mixed
+ *   False on error or no more messages in queue. TRUE or data on success.
  */
 function sif_put($type, $xml, $id = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
@@ -237,10 +257,15 @@ function sif_put($type, $xml, $id = NULL, $environment = NULL) {
 /**
  * Generic function to DELETE a SIF object
  * @param  string $type
+ *   Object type we are querying.
  * @param  string $xml
+ *   The XML for the query.
  * @param  string $id
+ *   The ID of the object to query for.
  * @param  string $environment
- * @return string
+ *   The environment to query within (uses default otherwise).
+ * @return mixed
+ *   False on error or no more messages in queue. TRUE or data on success.
  */
 function sif_delete($type, $xml = NULL, $id = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
@@ -289,9 +314,12 @@ function sif_delete($type, $xml = NULL, $id = NULL, $environment = NULL) {
 
 /**
  * Store a SIF data object as an entity
- * @param  string $type Type of data object
- * @param  string $xml  The XML representing the object
- * @return boolean      True on success, false on failure
+ * @param  string $type
+ *   Type of data object
+ * @param  string $xml
+ *   The XML representing the object
+ * @return boolean
+ *   True on success, false on failure
  */
 function sif_store($type, $xml) {
   $xml_object = new SimpleXMLElement($xml);
@@ -313,9 +341,12 @@ function sif_store($type, $xml) {
 
 /**
  * Delete a SIF data object stored as an entity
- * @param  string $type The type of object
- * @param  string $id   The id of the object
- * @return boolean      True on success, false on failure
+ * @param  string $type
+ *   The type of object
+ * @param  string $id
+ *   The id of the object
+ * @return boolean
+ *   True on success, false on failure
  */
 function sif_local_delete($type, $id){
   $args = array(
@@ -337,8 +368,10 @@ function sif_local_delete($type, $id){
 
 /**
  * Loads a SIF data object
- * @param  string $id ID of the object
- * @return mixed      Object on success, false on failure
+ * @param  string $id
+ *   ID of the object
+ * @return mixed
+ *   Object on success, false on failure
  */
 function sif_load($id) {
   $entities = entity_load('sif_data_object', array($id));
@@ -351,9 +384,12 @@ function sif_load($id) {
 
 /**
  * Checks the error code for a correct error message
- * @param  string $response Response object
- * @param  string $type     Type of request
- * @return mixed            The error associated with that code or false on an OK
+ * @param  string $response
+ *   Response object
+ * @param  string $type
+ *   Type of request
+ * @return mixed
+ *   The error associated with that code or false on an OK
  */
 function sif_error_check(&$response, $type, $queue = FALSE) {
   $statuses = array(
@@ -383,9 +419,10 @@ function sif_error_check(&$response, $type, $queue = FALSE) {
 
 /**
  * logs requests to watchdog if this setting is turned on
- * @param  array  $options  The options sent to drupal_http_request
- * @param  object $response The response object
- * @return none           
+ * @param  array  $options
+ *   The options sent to drupal_http_request
+ * @param  object $response
+ *   The response object         
  */
 function sif_log($options, &$response) {
   $log_setting = variable_get('sif_connection_logging');
