@@ -64,7 +64,7 @@ function clean_xml($xml, $html_encode = FALSE){
  * @param  string $environment
  * @return string
  */
-function sif_get($type, $id = NULL, $path = NULL, $environment = NULL) {
+function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL, $environment = NULL) {
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
   $url .= "/$type" . 's/';
   if ($id){
@@ -72,6 +72,12 @@ function sif_get($type, $id = NULL, $path = NULL, $environment = NULL) {
   }
   if ($path) {
     $url .= '/' . $path;
+  }
+  if ($page) {
+    $url .= "?page=$page";
+  }
+  if ($per_page) {
+    $url .= "&pageSize=$per_page";
   }
 
   $queue = FALSE;
