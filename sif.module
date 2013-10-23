@@ -97,6 +97,7 @@ function sif_get($type, $id = NULL, $path = NULL, $environment = NULL) {
       ),
     );
     $response = drupal_http_request($url, $options);
+    sif_log($options, $response);
 
     if (sif_error_check($response, 'GET', $queue)) {
       return FALSE;
@@ -156,6 +157,7 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $environment = NULL) {
       ),
     );
     $response = drupal_http_request($url, $options);
+    sif_log($options, $response);
 
     if (sif_error_check($response, 'POST')) {
       return FALSE;
@@ -208,6 +210,7 @@ function sif_put($type, $xml, $id = NULL, $environment = NULL) {
       ),
     );
     $response = drupal_http_request($url, $options);
+    sif_log($options, $response);
 
     if (sif_error_check($response, 'PUT')) {
       return FALSE;
@@ -260,6 +263,7 @@ function sif_delete($type, $xml = NULL, $id = NULL, $environment = NULL) {
       ),
     );
     $response = drupal_http_request($url, $options);
+    sif_log($options, $response);
 
     if (sif_error_check($response, 'DELETE')){
       return FALSE;
@@ -368,5 +372,43 @@ function sif_error_check(&$response, $type, $queue = FALSE) {
       
       return $error;
     }
+  }
+}
+
+/**
+ * logs requests to watchdog if this setting is turned on
+ * @param  array  $options  The options sent to drupal_http_request
+ * @param  object $response The response object
+ * @return none           
+ */
+function sif_log($options, &$response) {
+  $log_setting = variable_get('sif_connection_logging');
+  if ($log_setting) {
+    $args = array();
+
+    $args['!options'] = dpr($options, TRUE);
+    if (property_exists($response, 'data')) {
+      if ($response->data) {
+        $args['!data'] = clean_xml($response->data, TRUE);
+      }
+    }
+    if (property_exists($response, 'request')) {
+      $args['!request'] = dpr($response->request, TRUE);
+    }
+    if (property_exists($response, 'code')) {
+      $args['@code'] = $response->code;
+    }
+    if (property_exists($response, 'headers')) {
+      $args['!headers'] = dpr($response->headers, TRUE);
+    }
+    if (property_exists($response, 'error')) {
+      $args['!error'] = dpr($response->error, TRUE);
+    }
+    watchdog('sif', 'Request made. Returned code - @code<br/>
+      ---- Options ---- !options<br/>
+      ---- Request ---- !request<br/>
+      ---- Headers ---- !headers<br/>
+      ---- Data ---- !data<br/>
+      ---- Error ---- !error', $args);
   }
 }

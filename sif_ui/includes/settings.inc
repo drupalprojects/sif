@@ -38,6 +38,13 @@ function sif_settings_form($form, &$form_state) {
     '#default_value' => variable_get('sif_server_solution_id', 'testSolution'),
     '#required' => TRUE,
   );
+  $form['sif_connection_logging'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Connection Logging'),
+    '#description' => t('Check this to turn on logging of all connections (for debugging)'),
+    '#default_value' => variable_get('sif_connection_logging', 0),
+    '#required' => FALSE,
+  );
   return system_settings_form($form);
 }
 

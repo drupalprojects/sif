@@ -21,8 +21,8 @@ function sif_ui_menu() {
     'weight' => -7,
   );
   $items['admin/sif/config'] = array(
-    'title' => 'SIF Server',
-    'description' => 'Configure the SIF Server and authentication.',
+    'title' => 'SIF Configuration',
+    'description' => 'Configure the logging, the SIF Server and authentication.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sif_settings_form'),
     'access arguments' => array('configure sif'),
