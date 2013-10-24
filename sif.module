@@ -77,6 +77,19 @@ function clean_xml($xml, $html_encode = FALSE){
  *   False on error or no more messages in queue. TRUE or data on success.
  */
 function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL, $zone = NULL, $environment = NULL) {
+  $paged = !is_null($page);
+  $timeout = variable_get('sif_nav_timeout', 5);
+  $nav_info = variable_get('sif_nav_info', FALSE);
+  if ($nav_info) {
+    if ($nav_info['timestamp'] > strtotime("-$timeout minutes") && $paged) {
+      $navigation_id = $nav_info['navigation_id'];
+      $navigation_last_page = $nav_info['navigation_last_page'];
+      if ($page > $navigation_last_page && $navigation_last_page != -1) {
+        return FALSE;
+      }
+    }
+  }
+
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
   $url .= "/$type" . 's';
   if ($id){
@@ -88,16 +101,17 @@ function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL
   if ($zone) {
     $url .= ";zoneId=$zone";
   }
-  if ($page) {
+  if ($paged) {
     $url .= "?page=$page";
+    $url .= "&queryIntention=QUERYING_ALL_PAGES";
   }
   if ($per_page) {
     $url .= "&pageSize=$per_page";
   }
 
-  $queue = FALSE;
-  if ($type = 'queue') {
-    $queue = TRUE;
+  $two_oh_four_error = FALSE;
+  if ($type == 'queue' || $paged) {
+    $two_oh_four_error = TRUE;
   }
 
   if (!$environment) {
@@ -120,12 +134,22 @@ function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL
     $response = drupal_http_request($url, $options);
     sif_log($options, $response);
 
-    if (sif_error_check($response, 'GET', $queue)) {
+    if (sif_error_check($response, 'GET', $two_oh_four_error)) {
       return FALSE;
     } else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
           return $response->data;
+        }
+      }
+      if (property_exists($response, 'headers')) {
+        if ($response->headers['navigationId']) {
+          $nav_info['timestamp'] = time();
+          $nav_info['navigation_id'] = $response->headers['navigationId'];
+          if ($response->headers['navigationLastPage']) {
+            $nav_info['navigation_last_page'] = $response->headers['navigationLastPage'];
+          }
+          variable_set('sif_nav_info', $nav_info);
         }
       }
       return TRUE;
@@ -293,7 +317,7 @@ function sif_delete($type, $xml = NULL, $id = NULL, $zone = NULL, $environment =
   if ($zone) {
     $url .= ";zoneId=$zone";
   }
-  
+
   if (!$environment) {
     $environment = variable_get('sif_default_environment_id');
   }
@@ -411,14 +435,14 @@ function sif_load($id) {
  * @return mixed
  *   The error associated with that code or false on an OK
  */
-function sif_error_check(&$response, $type, $queue = FALSE) {
+function sif_error_check(&$response, $type, $two_oh_four_error = FALSE) {
   $statuses = array(
     '200' => 'OK',
     '201' => 'OK',
     '204' => 'OK',
   );
 
-  if ($queue && $response->code == '204') { // TODO: get rid of this cludginess
+  if ($two_oh_four_error && $response->code == '204') { // TODO: get rid of this cludginess
     return TRUE;
   } else {
     if (isset($statuses[$response->code])) {
