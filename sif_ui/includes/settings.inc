@@ -38,6 +38,13 @@ function sif_settings_form($form, &$form_state) {
     '#default_value' => variable_get('sif_server_solution_id', 'testSolution'),
     '#required' => TRUE,
   );
+  $form['sif_nav_timeout'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Navigation Timeout'),
+    '#description' => t('The amount of time that can pass between two calls to the same paged request.'),
+    '#default_value' => variable_get('sif_nav_timeout', '5'),
+    '#required' => TRUE,
+  );
   $form['sif_connection_logging'] = array(
     '#type' => 'checkbox',
     '#title' => t('Connection Logging'),
