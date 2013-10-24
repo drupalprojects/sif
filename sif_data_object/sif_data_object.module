@@ -84,7 +84,16 @@ function sif_data_object_sif_data_object_types(){
         'lastModified',
       ),
     ),
-    'subscription' => t('Subscription'),
+    'subscription' => array(
+      'name' => t('Subscription'),
+      'properties' => array(
+        'zoneId',
+        'contextId',
+        'serviceType',
+        'serviceName',
+        'queueId',
+      ),
+    ),
     'alert' => t('Alert'),
     'student' => t('Student'),
   );

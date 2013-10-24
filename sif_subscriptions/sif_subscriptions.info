@@ -1,0 +1,8 @@
+name = SIF Subscriptions
+description = Manage SIF Subscriptions
+package = SIF
+core = 7.x
+configure = admin/sif/subscriptions
+
+dependencies[] = sif
+dependencies[] = sif_data_object
