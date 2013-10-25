@@ -28,6 +28,7 @@ function sif_queues_page(){
 
       $actions = array();
       $actions[] = l(t('View XML'), "sif/$queue->id/xml");
+      $actions[] = l(t('Subscriptions'), "admin/sif/$queue->id/subscriptions");
       $actions[] = l(t('Delete'), "sif/$queue->id/delete", array('query' => array('destination' => 'admin/sif/queues')));
       $actions[] = l(t('Get Messages'), "sif/$queue->id/messages");
       $row[] = implode(' | ', $actions);

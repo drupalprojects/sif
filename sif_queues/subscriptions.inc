@@ -3,7 +3,7 @@
 /**
  * Subscriptions Page
  */
-function sif_subscriptions_page(){
+function sif_subscriptions_page($queue){
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'sif_data_object')
@@ -18,25 +18,25 @@ function sif_subscriptions_page(){
       $subscriptions = entity_load('sif_data_object', $object_ids);
     }
     foreach ($subscriptions as $subscription){
-      $row = array();
-      $row[] = l($subscription->id, "sif/$subscription->id");
-      $row[] = $subscription->queueId;
-      $row[] = $subscription->zoneId;
-      $row[] = $subscription->contextId;
-      $row[] = $subscription->serviceType;
-      $row[] = $subscription->serviceName;
+      if ($subscription->queueId == $queue) {
+        $row = array();
+        $row[] = l($subscription->id, "sif/$subscription->id");
+        $row[] = $subscription->zoneId;
+        $row[] = $subscription->contextId;
+        $row[] = $subscription->serviceType;
+        $row[] = $subscription->serviceName;
 
-      $actions = array();
-      $actions[] = l(t('View XML'), "sif/$subscription->id/xml");
-      $actions[] = l(t('Delete'), "sif/$subscription->id/delete", array('query' => array('destination' => 'admin/sif/subscriptions')));
-      $row[] = implode(' | ', $actions);
+        $actions = array();
+        $actions[] = l(t('View XML'), "sif/$subscription->id/xml");
+        $actions[] = l(t('Delete'), "sif/$subscription->id/delete", array('query' => array('destination' => 'admin/sif/subscriptions')));
+        $row[] = implode(' | ', $actions);
 
-      $rows[] = $row;
+        $rows[] = $row;
+      }
     }
   }
   $header = array(
     'name',
-    t('QueueID'),
     t('ZoneID'),
     t('ContextID'),
     t('ServiceType'),
@@ -48,7 +48,7 @@ function sif_subscriptions_page(){
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => t('You have no subscriptions in this site.'),
+    '#empty' => t('You have no subscriptions in this queue.'),
   );
 
   return $build;
@@ -57,7 +57,7 @@ function sif_subscriptions_page(){
 /**
  * Create Subscriptions Form
  */
-function sif_subscriptions_create(){
+function sif_subscriptions_create($form, &$form_state, $queue){
   $types = sif_data_object_sif_data_object_types();
   $types = array_keys($types);
   $types_select = array();
@@ -65,29 +65,9 @@ function sif_subscriptions_create(){
     $types_select[$type . 's'] = $type;
   }
 
-  $query = new EntityFieldQuery();
-  $query->entityCondition('entity_type', 'sif_data_object')
-    ->entityCondition('bundle', 'queue');
-  $result = $query->execute();
-
-  if (isset($result['sif_data_object'])) {
-    foreach ($result['sif_data_object'] as $object){
-      $object_ids = array_keys($result['sif_data_object']);
-      $queues = entity_load('sif_data_object', $object_ids);
-    }
-  }
-
-  $queues_select = array();
-  foreach ($queues as $queue) {
-    $queues_select[$queue->id] = $queue->name;
-  }
-
   $form['queue'] = array(
-    '#type' => 'select',
-    '#title' => t('Queue'),
-    '#options' => $queues_select,
-    '#description' => t('Select the queue you are subscribing in.'),
-    '#required' => TRUE,
+    '#type' => 'hidden',
+    '#value' => $queue,
   );
   $form['type'] = array(
     '#type' => 'select',
@@ -126,11 +106,12 @@ function sif_subscriptions_create_validate($form, &$form_state) {
  * Create Environment submit: entity_save() happens here.
  */
 function sif_subscriptions_create_submit($form, &$form_state) {
+  $queue = $form_state['values']['queue'];
   // Save Environment entity.
   $success = sif_store('subscription', $form_state['values']['xml']);
 
   if ($success){
-    $form_state['redirect'] = 'admin/sif/subscriptions';
+    $form_state['redirect'] = "admin/sif/$queue/subscriptions";
   }
 }
 
@@ -154,7 +135,11 @@ XML;
 /**
  * Get Subscriptions Form
  */
-function sif_subscriptions_get(){
+function sif_subscriptions_get($form, &$form_state, $queue){
+  $form['queue'] = array(
+    '#type' => 'hidden',
+    '#value' => $queue,
+  );
   $form['note'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('Load all subscriptions from the server.  This will update any existing subscriptions as well.') . '</p>',
@@ -175,15 +160,18 @@ function sif_subscriptions_get(){
 /**
  * Get Subscriptions Form
  */
-function sif_subscriptions_get_submit(){
+function sif_subscriptions_get_submit($from, &$form_state) {
+  $queue = $form_state['values']['queue'];
   $xml = sif_get('subscription');
   $subscriptions =  new SimpleXMLElement($xml);
-  foreach ($subscriptions->subscription as $i => $subscription){
-    sif_store('subscription',  $subscription->asXML());
-    $subscription_found = TRUE;
+  foreach ($subscriptions->subscription as $i => $subscription) {
+    if ($subscription->queueId == $queue) {
+      sif_store('subscription',  $subscription->asXML());
+      $subscription_found = TRUE;
+    }
   }
   if (!isset($subscription_found)){
     drupal_set_message(t('No subscriptions were found.'));
   }
-  drupal_goto('admin/sif/subscriptions');
+  drupal_goto("admin/sif/$queue/subscriptions");
 }
