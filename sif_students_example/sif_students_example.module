@@ -1,0 +1,56 @@
+<?php
+/**
+ * @file
+ * sif_students_example.module
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function sif_students_example_menu() {
+  $items = array();
+  $items['sif/students'] = array(
+    'title' => 'Students',
+    'description' => 'Create and manage SIF students.',
+    'page callback' => 'sif_students_page',
+    'access arguments' => array('configure sif'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'pages.inc',
+  );
+  $items['sif/students/create'] = array(
+    'title' => 'Create Student',
+    'description' => 'Create a new queue.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_students_create'),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'pages.inc',
+  );
+  $items['sif/students/get'] = array(
+    'title' => 'Get or Update Students',
+    'description' => 'Load all students from the SIF server.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_students_get'),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_sif_data_object_types().
+ */
+function sif_students_example_sif_data_object_types(){
+  return array(
+    'student' => array(
+      'name' => t('Student'),
+      'properties' => array(
+        'localId',
+      ),
+    ),
+  );
+}
+
+

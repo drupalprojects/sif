@@ -133,4 +133,30 @@ class SifEntityAPIController extends EntityAPIController {
       }
     }
   }
+
+  /**
+   * Load Student
+   */
+  private function load_student(&$entity, $ids = array(), $conditions = array()){
+
+    // Demographics
+    $entity->demographics = array();
+    if (property_exists($entity->data, 'demographics')){
+      foreach ($entity->data->demographics->children() as $demographic => $s){
+        $entity->demographics[(string) $demographic] = (string) $s;
+      }
+    }
+
+    // Email addresses
+    $entity->emailList = array();
+    foreach ($entity->data->emailList->children() as $s){
+      $entity->emailList[(string) $s->attributes()->emailType] = (string) $s;
+    }
+   
+    // Name
+    $entity->name = array();
+    foreach ($entity->data->name->nameOfRecord->children() as $type => $s){
+      $entity->name[(string) $type] = (string) $s;
+    }
+  }
 }
