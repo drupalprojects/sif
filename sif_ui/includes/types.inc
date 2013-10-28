@@ -6,6 +6,7 @@
 function sif_ui_data_object_types() {
 
   $objects = module_invoke_all('sif_data_object_types');
+  dpm($objects);
   $header = array(t('Name'));
   $rows = array();
 
