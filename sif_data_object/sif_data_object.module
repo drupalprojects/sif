@@ -95,7 +95,6 @@ function sif_data_object_sif_data_object_types(){
       ),
     ),
     'alert' => t('Alert'),
-    'student' => t('Student'),
   );
 }
 
