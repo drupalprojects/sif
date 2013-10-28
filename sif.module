@@ -367,7 +367,9 @@ function sif_delete($type, $xml = NULL, $id = NULL, $zone = NULL, $environment =
  */
 function sif_store($type, $xml) {
   $xml_object = new SimpleXMLElement($xml);
-  $id = (string) $xml_object->attributes()->id;
+  if (!$id = (string) $xml_object->attributes()->id) {
+    $id = (string) $xml_object->attributes()->refId;
+  }
   $values = array(
     'id' => $id,
     'type' => $type,
