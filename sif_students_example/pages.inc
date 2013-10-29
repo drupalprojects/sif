@@ -3,7 +3,7 @@
 /**
  * Students Page
  */
-function sif_students_page(){
+function sif_students_example_page(){
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'sif_data_object')
@@ -55,7 +55,7 @@ function sif_students_page(){
 /**
  * Create Students Form
  */
-function sif_students_create(){
+function sif_students_example_create(){
   $form['#tree'] = TRUE;
   $form['full_name'] = array(
     '#type' => 'textfield',
@@ -114,9 +114,9 @@ function sif_students_create(){
   $form['emails_fieldset']['add_email'] = array(
     '#type' => 'submit',
     '#value' => t('Add another email address'),
-    '#submit' => array('ajax_add_email'),
+    '#submit' => array('sif_students_example_ajax_add_email'),
     '#ajax' => array(
-      'callback' => 'ajax_add_email_callback',
+      'callback' => 'sif_students_example_ajax_add_email_callback',
       'wrapper' => 'emails-fieldset-wrapper',
     ),
   );
@@ -124,9 +124,9 @@ function sif_students_create(){
     $form['emails_fieldset']['remove_email'] = array(
       '#type' => 'submit',
       '#value' => t('Remove email'),
-      '#submit' => array('ajax_remove_email'),
+      '#submit' => array('sif_students_example_ajax_remove_email'),
       '#ajax' => array(
-        'callback' => 'ajax_add_email_callback',
+        'callback' => 'sif_students_example_ajax_add_email_callback',
         'wrapper' => 'emails-fieldset-wrapper',
       ),
     );
@@ -149,7 +149,7 @@ function sif_students_create(){
  *
  * Selects and returns the fieldset with the names in it.
  */
-function ajax_add_email_callback($form, $form_state) {
+function sif_students_example_ajax_add_email_callback($form, &$form_state) {
   return $form['emails_fieldset'];
 }
 
@@ -158,7 +158,7 @@ function ajax_add_email_callback($form, $form_state) {
  *
  * Increments the max counter and causes a rebuild.
  */
-function ajax_add_email($form, &$form_state) {
+function sif_students_example_ajax_add_email($form, &$form_state) {
   $form_state['num_emails']++;
   $form_state['rebuild'] = TRUE;
 }
@@ -168,7 +168,7 @@ function ajax_add_email($form, &$form_state) {
  *
  * Decrements the max counter and causes a form rebuild.
  */
-function ajax_remove_email($form, &$form_state) {
+function sif_students_example_ajax_remove_email($form, &$form_state) {
   if ($form_state['num_emails'] > 1) {
     $form_state['num_emails']--;
   }
@@ -178,21 +178,25 @@ function ajax_remove_email($form, &$form_state) {
 /**
  * Create Environment validation: POST happens here.
  */
-function sif_students_create_validate($form, &$form_state) {
-  $xml = sif_students_create_xml($form_state);
-  $results = sif_post('student', $xml);
+function sif_students_example_create_validate($form, &$form_state) {
+  dpm($form);
+  dpm($form_state);
+  if ($form_state['executed']){
+    $xml = sif_students_create_xml($form_state);
+    $results = sif_post('student', $xml);
 
-  if (!$results) {
-    form_set_error('xml', t('Error processing request. See above errors.'));
-  } else {
-    form_set_value($form['xml'], $results, $form_state);
+    if (!$results) {
+      form_set_error('xml', t('Error processing request. See above errors.'));
+    } else {
+      form_set_value($form['xml'], $results, $form_state);
+    }
   }
 }
 
 /**
  * Create Environment submit: entity_save() happens here.
  */
-function sif_students_create_submit($form, &$form_state) {
+function sif_students_example_create_submit($form, &$form_state) {
   // Save Environment entity.
   $success = sif_store('student', $form_state['values']['xml']);
 
@@ -205,7 +209,7 @@ function sif_students_create_submit($form, &$form_state) {
 /**
  * Generate a new environment XML object for POSTing
  */
-function sif_students_create_xml(&$form_state){
+function sif_students_example_create_xml(&$form_state){
   $emails = '';
   for ($i = 0; $i < $form_state['num_emails']; $i++) { 
     $email_type = $form_state['values']['emails_fieldset']['email_type'][$i];
@@ -241,7 +245,7 @@ XML;
 /**
  * Get Students Form
  */
-function sif_students_get(){
+function sif_students_example_get(){
   $form['note'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('Load all students from the server.  This will update any existing students as well.') . '</p>',
@@ -262,7 +266,7 @@ function sif_students_get(){
 /**
  * Get Students Form
  */
-function sif_students_get_submit(){
+function sif_students_example_get_submit(){
   $xml = sif_get('student');
   $students =  new SimpleXMLElement($xml);
   foreach ($students->student as $i => $student){
