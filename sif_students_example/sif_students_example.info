@@ -3,7 +3,5 @@ description = An example of how to create a SIF based module.
 package = SIF
 core = 7.x
 
-files[] = controller.inc
-
 dependencies[] = sif
 dependencies[] = sif_data_object

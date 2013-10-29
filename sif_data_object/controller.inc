@@ -19,14 +19,20 @@ class SifEntityAPIController extends EntityAPIController {
       $entity->data = new SimpleXMLElement($entity->xml);
 
       // Load all desired properties
-      foreach ($types[$entity->type]['properties'] as $property){
+      foreach ($types[$entity->type]['properties'] as $property) {
         $entity->{$property} = (string) $entity->data->{$property};
       }
 
       // Look for helper function
       $method = "load_" . $entity->type;
-      if (method_exists('SifEntityAPIController', $method)){
+      if (method_exists('SifEntityAPIController', $method)) {
         $this->{$method}($entity, $ids, $conditions);
+      }
+
+      // Look for external helper functions
+      if (function_exists('sif_load_' . $entity->type)) {
+        $loader = 'sif_load_' . $entity->type;
+        $loader($entity, $ids, $conditions);
       }
     }
     return $entities;
@@ -131,32 +137,6 @@ class SifEntityAPIController extends EntityAPIController {
       foreach ($entity->data->properties->property as $property) {
         $entity->zone_properties[(string) $property->attributes()->name] = (string) $property;
       }
-    }
-  }
-
-  /**
-   * Load Student
-   */
-  private function load_student(&$entity, $ids = array(), $conditions = array()){
-
-    // Demographics
-    $entity->demographics = array();
-    if (property_exists($entity->data, 'demographics')){
-      foreach ($entity->data->demographics->children() as $demographic => $s){
-        $entity->demographics[(string) $demographic] = (string) $s;
-      }
-    }
-
-    // Email addresses
-    $entity->emailList = array();
-    foreach ($entity->data->emailList->children() as $s){
-      $entity->emailList[(string) $s->attributes()->emailType] = (string) $s;
-    }
-   
-    // Name
-    $entity->name = array();
-    foreach ($entity->data->name->nameOfRecord->children() as $type => $s){
-      $entity->name[(string) $type] = (string) $s;
     }
   }
 }
