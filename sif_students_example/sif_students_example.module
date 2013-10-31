@@ -71,7 +71,7 @@ function sif_load_student(&$entity, $ids = array(), $conditions = array()){
   foreach ($entity->data->emailList->children() as $s){
     $entity->emailList[(string) $s->attributes()->emailType] = (string) $s;
   }
- 
+
   // Name
   $entity->name = array();
   foreach ($entity->data->name->nameOfRecord->children() as $type => $s){
