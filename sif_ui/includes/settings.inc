@@ -17,6 +17,13 @@ function sif_settings_form($form, &$form_state) {
     '#default_value' => variable_get('sif_server', 'http://rest3api.sifassociation.org/api'),
     '#required' => TRUE,
   );
+  $form['sif_server_auth_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Authorization Type'),
+    '#description' => t('Choose the authorization type. Token/Secret is the sandbox style base64 encoded 2 step process. Simple Token is a token-only based authoriaztion where the token is acquired through another process.'),
+    '#options' => array('secret' => t('Token/Secret (Sandbox-style)'), 'token' => t('Simple Token')),
+    '#required' => TRUE,
+  );
   $form['sif_server_auth_token'] = array(
     '#type' => 'textfield',
     '#title' => t('Initial Token'),
@@ -29,6 +36,13 @@ function sif_settings_form($form, &$form_state) {
     '#title' => t('Consumer Secret'),
     '#description' => t('Enter the secret to access this server (Similar to a password).'),
     '#default_value' => variable_get('sif_server_auth_secret', 'guest'),
+    '#required' => FALSE,
+  );
+  $form['sif_server_auth_header'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Authorization Header Parameter'),
+    '#description' => t("The header parameter that is used to authorize your requests ('Authorization' in the Sandbox)."),
+    '#default_value' => variable_get('sif_server_auth_header', 'Authorization'),
     '#required' => TRUE,
   );
   $form['sif_server_solution_id'] = array(

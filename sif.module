@@ -123,10 +123,11 @@ function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL
     if (isset($entities[$environment])){
       $token = $entities[$environment]->sessionToken;
     }
+    $authorization_header = variable_get('sif_server_auth_header', 'Authorization');
     $options = array(
       'method' => 'GET',
       'headers' => array(
-        'Authorization' => sif_get_application_key($token),
+        $authorization_header => sif_get_application_key($token),
         'Accept' => 'application/xml',
         'Content-Type' => 'application/xml',
       ),
@@ -201,12 +202,12 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $zone = NULL, $environment
         $token = $entities[$environment]->sessionToken;
       }
     }
-
+    $authorization_header = variable_get('sif_server_auth_header', 'Authorization');
     $options = array(
       'method' => 'POST',
       'data' => $xml,
       'headers' => array(
-        'Authorization' => sif_get_application_key($token),
+        $authorization_header => sif_get_application_key($token),
         'Accept' => 'application/xml',
         'Content-Type' => 'application/xml',
       ),
@@ -264,12 +265,12 @@ function sif_put($type, $xml, $id = NULL, $zone = NULL, $environment = NULL) {
     if (isset($entities[$environment])) {
       $token = $entities[$environment]->sessionToken;
     }
-
+    $authorization_header = variable_get('sif_server_auth_header', 'Authorization');
     $options = array(
       'method' => 'PUT',
       'data' => $xml,
       'headers' => array(
-        'Authorization' => sif_get_application_key($token),
+        $authorization_header => sif_get_application_key($token),
         'Accept' => 'application/xml',
         'Content-Type' => 'application/xml',
       ),
@@ -327,12 +328,12 @@ function sif_delete($type, $xml = NULL, $id = NULL, $zone = NULL, $environment =
     if ($env_object) {
       $token = $env_object->sessionToken;
     } // TODO: add checking for a valid token
-
+    $authorization_header = variable_get('sif_server_auth_header', 'Authorization');
     $options = array(
       'method' => 'DELETE',
       'data' => $xml,
       'headers' => array(
-        'Authorization' => sif_get_application_key($token),
+        $authorization_header => sif_get_application_key($token),
         'Accept' => 'application/xml',
         'Content-Type' => 'application/xml',
       ),
