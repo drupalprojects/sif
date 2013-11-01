@@ -179,17 +179,13 @@ function sif_students_example_ajax_remove_email($form, &$form_state) {
  * Create Environment validation: POST happens here.
  */
 function sif_students_example_create_validate($form, &$form_state) {
-  dpm($form);
-  dpm($form_state);
-  if ($form_state['executed']){
-    $xml = sif_students_create_xml($form_state);
-    $results = sif_post('student', $xml);
+  $xml = sif_students_example_create_xml($form_state);
+  $results = sif_post('student', $xml);
 
-    if (!$results) {
-      form_set_error('xml', t('Error processing request. See above errors.'));
-    } else {
-      form_set_value($form['xml'], $results, $form_state);
-    }
+  if (!$results) {
+    form_set_error('xml', t('Error processing request. See above errors.'));
+  } else {
+    form_set_value($form['xml'], $results, $form_state);
   }
 }
 
@@ -211,12 +207,14 @@ function sif_students_example_create_submit($form, &$form_state) {
  */
 function sif_students_example_create_xml(&$form_state){
   $emails = '';
-  for ($i = 0; $i < $form_state['num_emails']; $i++) { 
-    $email_type = $form_state['values']['emails_fieldset']['email_type'][$i];
-    $email = $form_state['values']['emails_fieldset']['email'][$i];
-    $emails .= <<<XML
-    <email emailType="$email_type">$email</email>
+  if (!empty($form_state['num_emails'])){
+    for ($i = 0; $i < $form_state['num_emails']; $i++) {
+      $email_type = $form_state['values']['emails_fieldset']['email_type'][$i];
+      $email = $form_state['values']['emails_fieldset']['email'][$i];
+      $emails .= <<<XML
+      <email emailType="$email_type">$email</email>
 XML;
+    }
   }
   $sexus = $form_state['values']['sexus'];
   $family_name = $form_state['values']['family_name'];
