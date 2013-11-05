@@ -217,6 +217,7 @@ XML;
     }
   }
   $sexus = $form_state['values']['sexus'];
+  $local_id = $form_state['values']['local_id'];
   $family_name = $form_state['values']['family_name'];
   $full_name = $form_state['values']['full_name'];
   $given_name = $form_state['values']['given_name'];
@@ -228,6 +229,9 @@ XML;
   <emailList>
     $emails
   </emailList>
+  <localId>
+    $local_id
+  </localId>
   <name nameRole="">
     <nameOfRecord>
       <familyName>$family_name</familyName>
@@ -265,13 +269,15 @@ function sif_students_example_get(){
  * Get Students Form
  */
 function sif_students_example_get_submit(){
-  $xml = sif_get('student');
+  $student_found = FALSE;
+  if ($xml = sif_get('student')) {
   $students =  new SimpleXMLElement($xml);
-  foreach ($students->student as $i => $student){
-    sif_store('student',  $student->asXML());
-    $student_found = TRUE;
+    foreach ($students->student as $i => $student){
+      sif_store('student',  $student->asXML());
+      $student_found = TRUE;
+    }
   }
-  if (!isset($student_found)){
+  if (!$student_found){
     drupal_set_message(t('No students were found.'));
   }
   drupal_goto('sif/students');
