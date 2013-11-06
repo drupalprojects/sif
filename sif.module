@@ -114,6 +114,10 @@ function sif_url_build($type, $id = NULL, $zone = NULL, $multi = FALSE, $path = 
  *   The request object
  */
 function sif_request($type, $url, $environment, $xml = NULL) {
+  module_invoke_all('sif_before_request', $type);
+  if (module_exists('rules')) {
+    rules_invoke_event('sif_before_request', $type);
+  }
   $token = NULL;
   if ($environment != 'new') {
     $entities = entity_load('sif_data_object', array($environment));
@@ -133,6 +137,10 @@ function sif_request($type, $url, $environment, $xml = NULL) {
   );  
   $response = drupal_http_request($url, $options);
   sif_log($options, $response);
+  module_invoke_all('sif_after_request', $type, $response->code);
+  if (module_exists('rules')) {
+    rules_invoke_event('sif_after_request', $type, $response->code);
+  }
   return $response;
 }
 
