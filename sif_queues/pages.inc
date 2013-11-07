@@ -31,6 +31,7 @@ function sif_queues_page(){
       $actions[] = l(t('Subscriptions'), "admin/sif/$queue->id/subscriptions");
       $actions[] = l(t('Delete'), "sif/$queue->id/delete", array('query' => array('destination' => 'admin/sif/queues')));
       $actions[] = l(t('Get Messages'), "sif/$queue->id/messages");
+      $actions[] = l(t('Schedule'), "admin/sif/queues/$queue->id/schedule");
       $row[] = implode(' | ', $actions);
 
       $rows[] = $row;
@@ -115,7 +116,6 @@ function sif_queues_create_submit($form, &$form_state) {
   }
 }
 
-
 /**
  * Generate a new environment XML object for POSTing
  */
@@ -126,7 +126,6 @@ function sif_queues_create_xml($name, $type){
 </queue>
 XML;
 }
-
 
 /**
  * Get Queues Form
@@ -148,7 +147,6 @@ function sif_queues_get(){
   return $form;
 }
 
-
 /**
  * Get Queues Form
  */
@@ -162,5 +160,71 @@ function sif_queues_get_submit(){
   if (!isset($queue_found)){
     drupal_set_message(t('No queues were found.'));
   }
+  drupal_goto('admin/sif/queues');
+}
+
+/**
+ * Schedule Queues Form
+ */
+function sif_queues_schedule($form, &$form_state, $queue){
+  $current_settings = variable_get('queue_' . $queue, array('length' => '1', 'period' => 'hours', 'status' => 'enabled'));
+  $form['queue'] = array(
+    '#type' => 'hidden',
+    '#value' => $queue,
+  );
+  $form['schedule'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t('Schedule'), 
+    '#attributes' => array('class' => array('container-inline')), 
+    '#required' => TRUE,
+  );
+  $form['schedule']['length'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Length'),
+    '#title_display' => 'invisible',
+    '#prefix' => t('Every'),
+    '#default_value' => $current_settings['length'],
+    '#required' => TRUE,
+  );
+  $form['schedule']['period'] = array(
+    '#type' => 'select',
+    '#title' => 'Period',
+    '#title_display' => 'invisible',
+    '#options' => array(
+      'hours' => t('Hours'),
+      'days' => t('Days'),
+    ),
+    '#default_value' => $current_settings['period'],
+    '#required' => TRUE,
+  );
+  $form['status'] = array(
+    '#type' => 'radios',
+    '#title' => t('Process This Queue?'),
+    '#description' => t('Enable or diable the processing of this queue.'),
+    '#options' => array(
+      'enable' => t('Enable'),
+      'disable' => t('Disable'),
+    ),
+    '#default_value' => $current_settings['status'],
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#value' => t('Save'),
+    '#type' => 'submit',
+  );
+  return $form;
+}
+
+/**
+ * Schedule Queues Form Submit
+ */
+function sif_queues_schedule_submit($form, &$form_state) {
+  $queue_schedule = array(
+    'length' => $form_state['values']['length'],
+    'period' => $form_state['values']['period'],
+    'status' => $form_state['values']['status'],
+  );
+  variable_set('queue_' . $form_state['values']['queue'], $queue_schedule);
+  drupal_set_message(t('Queue schedule updated.'));
   drupal_goto('admin/sif/queues');
 }

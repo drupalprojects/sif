@@ -35,6 +35,15 @@ function sif_queues_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'pages.inc',
   );
+  $items['admin/sif/queues/%/schedule'] = array(
+    'title' => 'Schedule Queue Processing',
+    'description' => 'Schedule how often this queue will be queried.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_queues_schedule', 3),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'pages.inc',
+  );
 
 
   // SIF Object View page.
