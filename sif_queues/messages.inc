@@ -23,7 +23,7 @@ function sif_queues_get_messages_submit(){
   $queues = entity_load('sif_data_object', array($id));
   $queue = $queues[$id];
 
-  $messages = sif_get('queue', $id, "messages");
+  $messages = sif_get('queue', array('id' => $id, 'path' => 'messages'));
 
   if (empty($messages)){
     drupal_set_message('There were no messages in the queue.', 'notice');

@@ -62,41 +62,70 @@ function clean_xml($xml, $html_encode = FALSE){
  * @return string
  *   The URL for the REST request
  */
-function sif_url_build($type, $id = NULL, $zone = NULL, $multi = FALSE, $path = NULL, $page = NULL, $per_page = NULL) {
-  $paged = !is_null($page);
-  $timeout = variable_get('sif_nav_timeout', 5);
-  $nav_info = variable_get('sif_nav_info', FALSE);
-  if ($nav_info) {
-    if ($nav_info['timestamp'] > strtotime("-$timeout minutes") && $paged) {
-      $navigation_id = $nav_info['navigation_id'];
-      $navigation_last_page = $nav_info['navigation_last_page'];
-      if ($page > $navigation_last_page && $navigation_last_page != -1) {
-        return FALSE;
+function sif_url_build($type, $path_args) {
+  $arg_types = array(
+    'zoneId' => 'matrix',
+    'deleteMessageId' => 'matrix',
+    'page' => 'query',
+    'pageSize' => 'query',
+    'path' => 'last',
+    'id' => 'last',
+    'multi' => 'multi',
+    'queryIntention' => 'query',
+  );
+  
+  if (!isset($path_args['page'])) {
+    $paged = FALSE;
+  } else {
+    $paged = $path_args['page'];
+  }
+
+  if ($paged) {
+    $timeout = variable_get('sif_nav_timeout', 5);
+    $nav_info = variable_get('sif_nav_info', FALSE);
+    if ($nav_info) {
+      if ($nav_info['timestamp'] > strtotime("-$timeout minutes")) {
+        $navigation_id = $nav_info['navigation_id'];
+        $navigation_last_page = $nav_info['navigation_last_page'];
+        if ($path_args['page'] > $navigation_last_page && $navigation_last_page != -1) {
+          return FALSE;
+        }
       }
     }
   }
 
+  $multi = $last = '';
+  $query = array();
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
   $url .= "/$type" . 's';
-  if (!$multi) {
-    $url .= "/$type";
+  foreach ($path_args as $type => $value) {
+    switch ($arg_types[$type]) {
+      case 'multi':
+        if (!$value) {
+          $url .= "/$type";
+        }
+        break;
+      case 'matrix':
+        if ($value) {
+          $matrix .= ";$type=$value";
+        }
+        break;
+      case 'query':
+        if ($value) {
+          $query[] = "$type=$value";
+        }
+        break;
+      case 'last':
+        if ($value) {
+          $last = "/$value";
+        }
+        break;
+    }
   }
-  if ($id){
-    $url .= "/$id";
-  }
-  if ($path) {
-    $url .= "/$path";
-  }
-  if ($zone) {
-    $url .= ";zoneId=$zone";
-  }
-  if ($paged) {
-    $url .= "?page=$page";
-    $url .= "&queryIntention=QUERYING_ALL_PAGES";
-  }
-  if ($per_page) {
-    $url .= "&pageSize=$per_page";
-  }
+
+  $query_str = '?' . implode('&', $query);
+  
+  $url .= $last . $matrix . $query_str;
   return $url;
 }
 
@@ -164,13 +193,18 @@ function sif_request($type, $url, $environment, $xml = NULL) {
  * @return mixed          
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL, $zone = NULL, $environment = NULL) {
-  if (!$url = sif_url_build($type, $id, $zone, TRUE, $path, $page, $per_page)) {
+function sif_get($type, $path_args = array(), $environment = NULL) {
+  if (!$url = sif_url_build($type, $path_args )) {
     drupal_set_message(t('No more pages available.'));
     return FALSE;
   }
 
-  $paged = !is_null($page);
+  if (!isset($path_args['page'])) {
+    $paged = FALSE;
+  } else {
+    $paged = $path_args['page'];
+  }
+
   $two_oh_four_error = FALSE;
   if ($type == 'queue' || $paged) {
     $two_oh_four_error = TRUE;
@@ -224,8 +258,8 @@ function sif_get($type, $id = NULL, $path = NULL, $page = NULL, $per_page = NULL
  * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_post($type, $xml = NULL, $multi = FALSE, $zone = NULL, $environment = NULL) {
-  $url = sif_url_build($type, NULL, $zone, $multi);
+function sif_post($type, $xml = NULL, $path_args = array(), $environment = NULL) {
+  $url = sif_url_build($type, $path_args);
 
   if ($type == 'environment') {
     $environment = 'new';
@@ -269,8 +303,8 @@ function sif_post($type, $xml = NULL, $multi = FALSE, $zone = NULL, $environment
  * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_put($type, $xml, $id = NULL, $zone = NULL, $environment = NULL) {
-  $url = sif_url_build($type, $id, $zone);
+function sif_put($type, $xml, $path_args = array(), $environment = NULL) {
+  $url = sif_url_build($type, $path_args);
 
   if (!$environment) {
     $environment = variable_get('sif_default_environment_id');
@@ -310,8 +344,8 @@ function sif_put($type, $xml, $id = NULL, $zone = NULL, $environment = NULL) {
  * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_delete($type, $xml = NULL, $id = NULL, $zone = NULL, $environment = NULL) {
-  $url = sif_url_build($type, $id, $zone);
+function sif_delete($type, $xml = NULL, $path_args = array(), $environment = NULL) {
+  $url = sif_url_build($type, $path_args);
 
   if (!$environment) {
     $environment = variable_get('sif_default_environment_id');
