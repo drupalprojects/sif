@@ -219,10 +219,16 @@ function sif_queues_schedule($form, &$form_state, $queue){
  * Schedule Queues Form Submit
  */
 function sif_queues_schedule_submit($form, &$form_state) {
+  $current = variable_get('queue_' . $form_state['values']['queue'], FALSE);
+  $last = '';
+  if ($current) {
+    $last = $current['last'];
+  }
   $queue_schedule = array(
     'length' => $form_state['values']['length'],
     'period' => $form_state['values']['period'],
     'status' => $form_state['values']['status'],
+    'last' => $last,
   );
   variable_set('queue_' . $form_state['values']['queue'], $queue_schedule);
   drupal_set_message(t('Queue schedule updated.'));
