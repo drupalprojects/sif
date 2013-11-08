@@ -162,7 +162,7 @@ function sif_subscriptions_get($form, &$form_state, $queue){
  */
 function sif_subscriptions_get_submit($from, &$form_state) {
   $queue = $form_state['values']['queue'];
-  $xml = sif_get('subscription');
+  $xml = sif_get('subscription', array('multi' => TRUE));
   $subscriptions =  new SimpleXMLElement($xml);
   foreach ($subscriptions->subscription as $i => $subscription) {
     if ($subscription->queueId == $queue) {

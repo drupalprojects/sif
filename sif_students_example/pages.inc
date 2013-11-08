@@ -270,7 +270,7 @@ function sif_students_example_get(){
  */
 function sif_students_example_get_submit(){
   $student_found = FALSE;
-  if ($xml = sif_get('student')) {
+  if ($xml = sif_get('student', array('multi' => TRUE))) {
   $students =  new SimpleXMLElement($xml);
     foreach ($students->student as $i => $student){
       sif_store('student',  $student->asXML());

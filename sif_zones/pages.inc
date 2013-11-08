@@ -82,7 +82,7 @@ function sif_zones_get(){
  * Get Zones Form Submit
  */
 function sif_zones_get_submit(){
-  $xml = sif_get('zone');
+  $xml = sif_get('zone', array('multi' => TRUE));
   $zones =  new SimpleXMLElement($xml);
   foreach ($zones->zone as $i => $zone){
     sif_store('zone',  $zone->asXML());

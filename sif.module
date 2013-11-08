@@ -79,6 +79,9 @@ function sif_url_build($type, $path_args) {
   } else {
     $paged = $path_args['page'];
   }
+  if (!isset($path_args['multi'])) {
+    $path_args['multi'] = FALSE;
+  }
 
   if ($paged) {
     $timeout = variable_get('sif_nav_timeout', 5);

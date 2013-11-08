@@ -151,7 +151,7 @@ function sif_queues_get(){
  * Get Queues Form
  */
 function sif_queues_get_submit(){
-  $xml = sif_get('queue');
+  $xml = sif_get('queue', array('multi' => TRUE));
   $queues =  new SimpleXMLElement($xml);
   foreach ($queues->queue as $i => $queue){
     sif_store('queue',  $queue->asXML());
