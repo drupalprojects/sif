@@ -95,3 +95,61 @@ function sif_queues_menu() {
 function sif_queues_menu_access($sif_object){
   return $sif_object->type == 'queue';
 }
+
+/**
+ * Implements hook_cron_queue_info()
+ */
+function sif_queues_cron_queue_info() {
+  $queues = array();
+  $queues['sif_queue_list'] = array(
+    'worker callback' => 'sif_queue_process',
+    'time' => 60,
+  );
+  return $queues;
+}
+
+/**
+* Implements hook_cron().
+*/
+function sif_queues_cron() {
+  $drupal_queue = DrupalQueue::get('sif_queue_list');
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'sif_data_object')
+    ->entityCondition('bundle', 'queue');
+  $result = $query->execute();
+
+  if (isset($result['sif_data_object'])) {
+    foreach ($result['sif_data_object'] as $object){
+      $object_ids = array_keys($result['sif_data_object']);
+      $queues = entity_load('sif_data_object', $object_ids);
+    }
+    foreach ($queues as $queue){
+      $timing = variable_get('queue_' . $queue, array('length' => 1, 'period' => 'hour', 'status' => 'enabled', 'last' => time()));
+      if (time() >= strtotime('plus ' . $timing['length'] . ' ' . $timing['period'], $timing['last'])) {
+        $drupal_queue->createItem($queue);
+      }
+    }
+  }
+}
+
+/**
+ * Processes the SIF queues stored in the drupal queue
+ */
+function sif_queue_process($queue){
+  $last_message = variable_get('sif_last_message', '');
+  while ($results = sif_get('queue', array('id' => $id, 'path' => 'messages', 'deleteMessageId' => $last_message))) {
+    if ($xml =  new SimpleXMLElement($results)) {
+      $type = $xml->getName();
+      if (property_exists($xml->attributes(), 'id')) {
+        $id = $xml->attributes()->id;
+      } else {
+        $id = $xml->attributes()->refId;
+      }
+      //$type = rtrim($type, 's');
+      sif_store($type, $results);
+      variable_set('sif_last_message', $id);
+    }
+  }
+  variable_set('sif_last_message', '');
+}
