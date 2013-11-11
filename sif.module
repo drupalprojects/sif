@@ -230,7 +230,7 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
     } else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
-          return $response->data;
+          return $response;
         }
       }
       if (property_exists($response, 'headers')) {
@@ -285,7 +285,7 @@ function sif_post($type, $xml = NULL, $path_args = array(), $environment = NULL)
     } else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
-          return $response->data;
+          return $response;
         }
       }
       return TRUE;
@@ -326,7 +326,7 @@ function sif_put($type, $xml, $path_args = array(), $environment = NULL) {
     } else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
-          return $response->data;
+          return $response;
         }
       }
       return TRUE;
@@ -367,7 +367,7 @@ function sif_delete($type, $xml = NULL, $path_args = array(), $environment = NUL
     } else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
-          return $response->data;
+          return $response;
         }
       }
       return TRUE;
@@ -387,7 +387,7 @@ function sif_delete($type, $xml = NULL, $path_args = array(), $environment = NUL
  * @return boolean
  *   True on success, false on failure
  */
-function sif_store($type, $xml) {
+function sif_store($type, $xml, $headers) {
   $xml_object = new SimpleXMLElement($xml);
   if (!$id = (string) $xml_object->attributes()->id) {
     $id = (string) $xml_object->attributes()->refId;
@@ -396,6 +396,7 @@ function sif_store($type, $xml) {
     'id' => $id,
     'type' => $type,
     'xml' => $xml,
+    'headers' => serialize($headers),
   );
   $entity = entity_create('sif_data_object', $values);
   if (entity_save('sif_data_object', $entity)){

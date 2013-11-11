@@ -125,7 +125,7 @@ function sif_queues_cron() {
       $queues = entity_load('sif_data_object', $object_ids);
     }
     foreach ($queues as $queue){
-      $timing = variable_get('queue_' . $queue, array('length' => 1, 'period' => 'hour', 'status' => 'enabled', 'last' => time()));
+      $timing = variable_get('sif_queue_' . $queue, array('length' => 1, 'period' => 'hour', 'status' => 'enabled', 'last' => time()));
       if (time() >= strtotime('plus ' . $timing['length'] . ' ' . $timing['period'], $timing['last'])) {
         $drupal_queue->createItem($queue);
       }
@@ -137,9 +137,9 @@ function sif_queues_cron() {
  * Processes the SIF queues stored in the drupal queue
  */
 function sif_queue_process($queue){
-  $last_message = variable_get('sif_last_message', '');
-  while ($results = sif_get('queue', array('id' => $id, 'path' => 'messages', 'deleteMessageId' => $last_message))) {
-    if ($xml =  new SimpleXMLElement($results)) {
+  $last_message = variable_get("sif_queue_last_$queue", '');
+  while ($results = sif_get('queue', array('id' => $id, 'path' => 'messages', 'multi' => TRUE, 'deleteMessageId' => $last_message))) {
+    if ($xml = new SimpleXMLElement($results->data)) {
       $type = $xml->getName();
       if (property_exists($xml->attributes(), 'id')) {
         $id = $xml->attributes()->id;
@@ -147,9 +147,9 @@ function sif_queue_process($queue){
         $id = $xml->attributes()->refId;
       }
       //$type = rtrim($type, 's');
-      sif_store($type, $results);
-      variable_set('sif_last_message', $id);
+      sif_store($type, $results->data, $results->headers);
+      variable_set("sif_queue_last_$queue", $id);
     }
   }
-  variable_set('sif_last_message', '');
+  variable_set("sif_queue_last_$queue", '');
 }

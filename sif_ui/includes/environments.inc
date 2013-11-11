@@ -103,6 +103,9 @@ function sif_ui_environment_create(){
   $form['xml'] = array(
     '#type' => 'value',
   );
+  $form['headers'] = array(
+    '#type' => 'value',
+  );
   return $form;
 }
 
@@ -116,7 +119,8 @@ function sif_ui_environment_create_validate($form, &$form_state) {
   if (!$results) {
     form_set_error('xml', t('Error processing request. See above errors.'));
   } else {
-    form_set_value($form['xml'], $results, $form_state);
+    form_set_value($form['xml'], $results->data, $form_state);
+    form_set_value($form['headers'], $results->headers, $form_state);
   }
 }
 
@@ -125,7 +129,7 @@ function sif_ui_environment_create_validate($form, &$form_state) {
  */
 function sif_ui_environment_create_submit($form, &$form_state) {
   // Save Environment entity.
-  $success = sif_store('environment', $form_state['values']['xml']);
+  $success = sif_store('environment', $form_state['values']['xml'], $form_state['values']['headers']);
 
   if ($success){
     //$sif_object = sif_data_object_load();

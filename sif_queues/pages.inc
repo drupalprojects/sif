@@ -87,6 +87,9 @@ function sif_queues_create(){
   $form['xml'] = array(
     '#type' => 'value',
   );
+  $form['headers'] = array(
+    '#type' => 'value',
+  );
   return $form;
 }
 
@@ -100,7 +103,8 @@ function sif_queues_create_validate($form, &$form_state) {
   if (!$results) {
     form_set_error('xml', t('Error processing request. See above errors.'));
   } else {
-    form_set_value($form['xml'], $results, $form_state);
+    form_set_value($form['xml'], $results->data, $form_state);
+    form_set_value($form['headers'], $results->headers, $form_state);
   }
 }
 
@@ -109,7 +113,7 @@ function sif_queues_create_validate($form, &$form_state) {
  */
 function sif_queues_create_submit($form, &$form_state) {
   // Save Environment entity.
-  $success = sif_store('queue', $form_state['values']['xml']);
+  $success = sif_store('queue', $form_state['values']['xml'], $form_state['values']['headers']);
 
   if ($success){
     $form_state['redirect'] = 'admin/sif/queues';
@@ -151,10 +155,11 @@ function sif_queues_get(){
  * Get Queues Form
  */
 function sif_queues_get_submit(){
-  $xml = sif_get('queue', array('multi' => TRUE));
-  $queues =  new SimpleXMLElement($xml);
+  $response = sif_get('queue', array('multi' => TRUE));
+  $xml = $response->data;
+  $queues = new SimpleXMLElement($xml);
   foreach ($queues->queue as $i => $queue){
-    sif_store('queue',  $queue->asXML());
+    sif_store('queue',  $queue->asXML(), $response->headers);
     $queue_found = TRUE;
   }
   if (!isset($queue_found)){
@@ -167,7 +172,7 @@ function sif_queues_get_submit(){
  * Schedule Queues Form
  */
 function sif_queues_schedule($form, &$form_state, $queue){
-  $current_settings = variable_get('queue_' . $queue, array('length' => '1', 'period' => 'hours', 'status' => 'enabled'));
+  $current_settings = variable_get('sif_queue_' . $queue, array('length' => '1', 'period' => 'hours', 'status' => 'enabled'));
   $form['queue'] = array(
     '#type' => 'hidden',
     '#value' => $queue,
@@ -219,7 +224,7 @@ function sif_queues_schedule($form, &$form_state, $queue){
  * Schedule Queues Form Submit
  */
 function sif_queues_schedule_submit($form, &$form_state) {
-  $current = variable_get('queue_' . $form_state['values']['queue'], FALSE);
+  $current = variable_get('sif_queue_' . $form_state['values']['queue'], FALSE);
   $last = '';
   if ($current) {
     $last = $current['last'];
@@ -230,7 +235,7 @@ function sif_queues_schedule_submit($form, &$form_state) {
     'status' => $form_state['values']['status'],
     'last' => $last,
   );
-  variable_set('queue_' . $form_state['values']['queue'], $queue_schedule);
+  variable_set('sif_queue_' . $form_state['values']['queue'], $queue_schedule);
   drupal_set_message(t('Queue schedule updated.'));
   drupal_goto('admin/sif/queues');
 }

@@ -141,6 +141,9 @@ function sif_students_example_create(){
   $form['xml'] = array(
     '#type' => 'value',
   );
+  $form['headers'] = array(
+    '#type' => 'value',
+  );
   return $form;
 }
 
@@ -185,7 +188,8 @@ function sif_students_example_create_validate($form, &$form_state) {
   if (!$results) {
     form_set_error('xml', t('Error processing request. See above errors.'));
   } else {
-    form_set_value($form['xml'], $results, $form_state);
+    form_set_value($form['xml'], $results->data, $form_state);
+    form_set_value($form['headers'], $results->headers, $form_state);
   }
 }
 
@@ -194,7 +198,7 @@ function sif_students_example_create_validate($form, &$form_state) {
  */
 function sif_students_example_create_submit($form, &$form_state) {
   // Save Environment entity.
-  $success = sif_store('student', $form_state['values']['xml']);
+  $success = sif_store('student', $form_state['values']['xml'], $form_state['values']['headers']);
 
   if ($success){
     $form_state['redirect'] = 'sif/students';
@@ -270,10 +274,11 @@ function sif_students_example_get(){
  */
 function sif_students_example_get_submit(){
   $student_found = FALSE;
-  if ($xml = sif_get('student', array('multi' => TRUE))) {
-  $students =  new SimpleXMLElement($xml);
+  if ($response = sif_get('student', array('multi' => TRUE))) {
+    $xml = $response->data;
+    $students = new SimpleXMLElement($xml);
     foreach ($students->student as $i => $student){
-      sif_store('student',  $student->asXML());
+      sif_store('student',  $student->asXML(), $response->headers);
       $student_found = TRUE;
     }
   }

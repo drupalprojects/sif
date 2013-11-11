@@ -85,6 +85,9 @@ function sif_subscriptions_create($form, &$form_state, $queue){
   $form['xml'] = array(
     '#type' => 'value',
   );
+  $form['headers'] = array(
+    '#type' => 'value',
+  );
   return $form;
 }
 
@@ -98,7 +101,8 @@ function sif_subscriptions_create_validate($form, &$form_state) {
   if (!$results) {
     form_set_error('xml', t('Error processing request. See above errors.'));
   } else {
-    form_set_value($form['xml'], $results, $form_state);
+    form_set_value($form['xml'], $results->data, $form_state);
+    form_set_value($form['headers'], $results->headers, $form_state);
   }
 }
 
@@ -108,7 +112,7 @@ function sif_subscriptions_create_validate($form, &$form_state) {
 function sif_subscriptions_create_submit($form, &$form_state) {
   $queue = $form_state['values']['queue'];
   // Save Environment entity.
-  $success = sif_store('subscription', $form_state['values']['xml']);
+  $success = sif_store('subscription', $form_state['values']['xml'], $form_state['values']['headers']);
 
   if ($success){
     $form_state['redirect'] = "admin/sif/$queue/subscriptions";
@@ -162,11 +166,12 @@ function sif_subscriptions_get($form, &$form_state, $queue){
  */
 function sif_subscriptions_get_submit($from, &$form_state) {
   $queue = $form_state['values']['queue'];
-  $xml = sif_get('subscription', array('multi' => TRUE));
+  $response = sif_get('subscription', array('multi' => TRUE));
+  $xml = $response->data;
   $subscriptions =  new SimpleXMLElement($xml);
   foreach ($subscriptions->subscription as $i => $subscription) {
     if ($subscription->queueId == $queue) {
-      sif_store('subscription',  $subscription->asXML());
+      sif_store('subscription',  $subscription->asXML(), $response->headers);
       $subscription_found = TRUE;
     }
   }

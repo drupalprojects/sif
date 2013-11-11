@@ -18,6 +18,9 @@ class SifEntityAPIController extends EntityAPIController {
       // Give all entities a SimpleXML object
       $entity->data = new SimpleXMLElement($entity->xml);
 
+      // Reload headers as array
+      $entity->meta = unserialize((string) $entity->headers);
+
       // Load all desired properties
       foreach ($types[$entity->type]['properties'] as $property) {
         $entity->{$property} = (string) $entity->data->{$property};

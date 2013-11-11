@@ -44,6 +44,12 @@ function sif_data_object_schema(){
         'size' => 'medium',
         'not null' => TRUE,
       ),
+      'headers' => array(
+        'description' => 'The HTTP headers returned with this object.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ),
     ),
     'primary key' => array('id'),
   );
