@@ -84,7 +84,7 @@ function sif_object_delete_form_validate($form, &$form_state) {
       $sif_env = $sif_id;
     }
 
-    if ($response = sif_delete($type, NULL, array('id' => $sif_id), $sif_env)) {
+    if ($response = sif_delete($type, NULL, array('id' => $sif_id, 'multi' => TRUE), $sif_env)) {
       if ($type == 'environment') {
         // Unset the default environment if we are deleting the current default.
         if ($default == $sif_id) {
