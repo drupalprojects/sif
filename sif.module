@@ -69,7 +69,7 @@ function sif_url_build($type, $path_args) {
     'page' => 'query',
     'pageSize' => 'query',
     'path' => 'last',
-    'id' => 'last',
+    'id' => 'id',
     'multi' => 'multi',
     'queryIntention' => 'query',
   );
@@ -97,7 +97,7 @@ function sif_url_build($type, $path_args) {
     }
   }
 
-  $multi = $last = $matrix = '';
+  $multi = $last = $matrix = $id = '';
   $query = array();
   $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
   $url .= "/$type" . 's';
@@ -118,6 +118,11 @@ function sif_url_build($type, $path_args) {
           $query[] = "$arg_type=$value";
         }
         break;
+      case 'id':
+        if ($value) {
+          $id = "/$value";
+        }
+        break;
       case 'last':
         if ($value) {
           $last = "/$value";
@@ -128,7 +133,7 @@ function sif_url_build($type, $path_args) {
 
   $query_str = '?' . implode('&', $query);
   
-  $url .= $last . $matrix . $query_str;
+  $url .= $id . $last . $matrix . $query_str;
   return $url;
 }
 
