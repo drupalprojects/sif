@@ -431,6 +431,7 @@ function sif_store($type, $xml, $headers) {
   );
   $entity = entity_create('sif_data_object', $values);
   if (entity_save('sif_data_object', $entity)){
+    module_invoke_all('sif_after_store', $type, $id);
     drupal_set_message(t('SIF %type object was saved.', array('%type' => $entity->type)));
     return TRUE;
   } else {
