@@ -85,26 +85,29 @@ function sif_url_build($type, $path_args) {
     'multi' => 'multi',
     'queryIntention' => 'query',
   );
+  $query_stamp = sif_query_stamp($type, $path_args);
   
   if (!isset($path_args['page'])) {
     $paged = FALSE;
-  } else {
+  }
+  else {
     $paged = $path_args['page'];
   }
+
   if (!isset($path_args['multi'])) {
     $path_args['multi'] = FALSE;
   }
 
   if ($paged) {
     $timeout = variable_get('sif_nav_timeout', 5);
-    $nav_info = variable_get('sif_nav_info', FALSE);
+    $nav_info = variable_get("sif_nav_$query_stamp", FALSE);
     if ($nav_info) {
-      if ($nav_info['timestamp'] > strtotime("-$timeout minutes")) {
-        $navigation_id = $nav_info['navigation_id'];
-        $navigation_last_page = $nav_info['navigation_last_page'];
-        if ($path_args['page'] > $navigation_last_page && $navigation_last_page != -1) {
-          return FALSE;
-        }
+      if (!preg_match("/^\d+$/", $paged)) {
+        $path_args['page'] = $nav_info['navigation_page'] + 1;
+      }
+      $navigation_last_page = $nav_info['navigation_last_page'];
+      if (($nav_info['timestamp'] < strtotime("-$timeout minutes")) || ($path_args['page'] > $navigation_last_page && $navigation_last_page != -1)) {
+        return FALSE;
       }
     }
   }
@@ -162,11 +165,12 @@ function sif_url_build($type, $path_args) {
  * @return object              
  *   The request object
  */
-function sif_request($type, $url, $environment, $xml = NULL) {
+function sif_request($type, $url, $environment, $xml = NULL, $query_stamp = NULL) {
   module_invoke_all('sif_before_request', $type);
   if (module_exists('rules')) {
     rules_invoke_event('sif_before_request', $type);
   }
+
   $token = NULL;
   if ($environment != 'new') {
     $entities = entity_load('sif_data_object', array($environment));
@@ -183,16 +187,27 @@ function sif_request($type, $url, $environment, $xml = NULL) {
       'Accept' => 'application/xml',
       'Content-Type' => 'application/xml',
     ),
-  );  
+  );
+  if ($nav_info = variable_get("sif_nav_$query_stamp", FALSE)) {
+    $options['headers']['navigationId'] = $nav_info['navigation_id'];
+  }
   $response = drupal_http_request($url, $options);
   sif_log($options, $response);
+
   module_invoke_all('sif_after_request', $type, $response->code);
   if (module_exists('rules')) {
     rules_invoke_event('sif_after_request', $type, $response->code);
   }
+
   return $response;
 }
 
+/**
+ * Helper to uniquely (sort of) identify a query
+ */
+function sif_query_stamp($type, $path_args) {
+  return md5($type . serialize($path_args));
+}
 
 /**
  * Generic function to GET a SIF object
@@ -214,7 +229,8 @@ function sif_request($type, $url, $environment, $xml = NULL) {
  *   False on error or no more messages in queue. TRUE or data on success.
  */
 function sif_get($type, $path_args = array(), $environment = NULL) {
-  if (!$url = sif_url_build($type, $path_args )) {
+  $query_stamp = sif_query_stamp($type, $path_args);
+  if (!$url = sif_url_build($type, $path_args)) {
     drupal_set_message(t('No more pages available.'));
     return FALSE;
   }
@@ -235,7 +251,7 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
   }
 
   if ($environment) {
-    $response = sif_request('GET', $url, $environment);
+    $response = sif_request('GET', $url, $environment, NULL, $query_stamp);
 
     if (sif_error_check($response, 'GET', $two_oh_four_error)) {
       return FALSE;
@@ -252,7 +268,10 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
           if ($response->headers['navigationLastPage']) {
             $nav_info['navigation_last_page'] = $response->headers['navigationLastPage'];
           }
-          variable_set('sif_nav_info', $nav_info);
+          if ($response->headers['navigationPage']) {
+            $nav_info['navigation_page'] = $response->headers['navigationPage'];
+          }
+          variable_set("sif_nav_$query_stamp", $nav_info);
         }
       }
       return TRUE;
