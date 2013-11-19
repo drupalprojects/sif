@@ -13,7 +13,7 @@ class sifRequest {
     'queryIntention' => 'query',
   );
 
-  private function __construct($request_type, $sif_type, $url_args, $environment = NULL) {
+  function __construct($request_type, $sif_type, $url_args, $environment = NULL) {
     if (!$environment) {
       $environment = variable_get('sif_default_environment_id');
     }
@@ -60,7 +60,7 @@ class sifRequest {
       }
     }
 
-    $this->url = sif_url_build();
+    $this->url = $this->sif_url_build();
   }
 
   /**
@@ -70,12 +70,12 @@ class sifRequest {
     $multi = $last = $matrix = $id = '';
     $query = array();
     $url = variable_get('sif_server', 'http://rest3api.sifassociation.org/api');
-    $url .= "/$this->type" . 's';
+    $url .= "/$this->sif_type" . 's';
     foreach ($this->url_args as $arg_type => $value) {
       switch ($this->arg_types[$arg_type]) {
         case 'multi':
           if (!$value) {
-            $url .= "/$type";
+            $url .= "/$this->sif_type";
           }
           break;
         case 'matrix':
@@ -129,9 +129,9 @@ class sifRequest {
     $response = drupal_http_request($this->url, $options);
     sif_log($options, $response);
 
-    module_invoke_all('sif_after_request', $type, $response->code);
+    module_invoke_all('sif_after_request', $this->request_type, $response->code);
     if (module_exists('rules')) {
-      rules_invoke_event('sif_after_request', $type, $response->code);
+      rules_invoke_event('sif_after_request', $this->request_type, $response->code);
     }
 
     return $response;
