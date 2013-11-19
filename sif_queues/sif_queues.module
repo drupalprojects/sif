@@ -125,9 +125,9 @@ function sif_queues_cron() {
       $queues = entity_load('sif_data_object', $object_ids);
     }
     foreach ($queues as $queue){
-      $timing = variable_get('sif_queue_' . $queue, array('length' => 1, 'period' => 'hour', 'status' => 'enabled', 'last' => time()));
+      $timing = variable_get('sif_queue_' . $queue->id, array('length' => 1, 'period' => 'hour', 'status' => 'enabled', 'last' => time(), 'drupalqueue' => 0));
       if (time() >= strtotime('plus ' . $timing['length'] . ' ' . $timing['period'], $timing['last'])) {
-        $drupal_queue->createItem($queue);
+        $drupal_queue->createItem($queue->id);
       }
     }
   }
@@ -138,6 +138,10 @@ function sif_queues_cron() {
  */
 function sif_queues_queueprocess($queue) {
   $last_message = variable_get("sif_queue_last_$queue", '');
+  $settings = variable_get("sif_queue_$queue", array('length' => 1, 'period' => 'hour', 'status' => 'enabled', 'last' => time(), 'drupalqueue' => 0));
+  if ($settings['drupalqueue']) {
+    $drupal_queue = DrupalQueue::get("sif_queue_$queue");
+  }
   while ($results = sif_get('queue', array('id' => $id, 'path' => 'messages', 'multi' => TRUE, 'deleteMessageId' => $last_message))) {
     if ($xml = new SimpleXMLElement($results->data)) {
       $type = $xml->getName();
@@ -146,8 +150,11 @@ function sif_queues_queueprocess($queue) {
       } else {
         $id = $xml->attributes()->refId;
       }
-      //$type = rtrim($type, 's');
+      $type = rtrim($type, 's');
       sif_store($type, $results->data, $results->headers);
+      if ($settings['drupalqueue']) {
+        $drupal_queue->createItem($id);
+      }
       variable_set("sif_queue_last_$queue", $id);
     }
   }

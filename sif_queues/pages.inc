@@ -172,7 +172,7 @@ function sif_queues_get_submit(){
  * Schedule Queues Form
  */
 function sif_queues_schedule($form, &$form_state, $queue){
-  $current_settings = variable_get('sif_queue_' . $queue, array('length' => '1', 'period' => 'hours', 'status' => 'enabled'));
+  $current_settings = variable_get('sif_queue_' . $queue, array('length' => '1', 'period' => 'hours', 'status' => 'enabled', 'drupalqueue' => 0));
   $form['queue'] = array(
     '#type' => 'hidden',
     '#value' => $queue,
@@ -213,6 +213,12 @@ function sif_queues_schedule($form, &$form_state, $queue){
     '#default_value' => $current_settings['status'],
     '#required' => TRUE,
   );
+  $form['drupalqueue'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Add items to Drupal Queue'),
+    '#description' => t('Add any objects creted or modified by this SIF queue to a Drupal queue named sif_queue_QUEUE_ID.'),
+    '#default_value' => $current_settings['drupalqueue'],
+  );
   $form['submit'] = array(
     '#value' => t('Save'),
     '#type' => 'submit',
@@ -234,6 +240,7 @@ function sif_queues_schedule_submit($form, &$form_state) {
     'period' => $form_state['values']['period'],
     'status' => $form_state['values']['status'],
     'last' => $last,
+    'drupalqueue' => $form_state['values']['drupalqueue'],
   );
   variable_set('sif_queue_' . $form_state['values']['queue'], $queue_schedule);
   drupal_set_message(t('Queue schedule updated.'));
