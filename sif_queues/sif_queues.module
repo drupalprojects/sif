@@ -53,7 +53,6 @@ function sif_queues_menu() {
     'page arguments' => array('sif_queues_get_messages', 1),
     'access callback' => 'sif_queues_menu_access',
     'access arguments' => array(1),
-    'file' => 'includes/pages.inc',
     'type' => MENU_LOCAL_TASK,
     'file' => 'messages.inc',
   );

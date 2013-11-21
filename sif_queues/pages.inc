@@ -216,7 +216,7 @@ function sif_queues_schedule($form, &$form_state, $queue){
   $form['drupalqueue'] = array(
     '#type' => 'checkbox',
     '#title' => t('Add items to Drupal Queue'),
-    '#description' => t('Add any objects creted or modified by this SIF queue to a Drupal queue named sif_queue_QUEUE_ID.'),
+    '#description' => t('Add any objects created or modified by this SIF queue to a Drupal queue named sif_queue_items.'),
     '#default_value' => $current_settings['drupalqueue'],
   );
   $form['submit'] = array(

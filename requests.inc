@@ -40,7 +40,7 @@ class sifRequest {
       $this->paged = FALSE;
     }
     else {
-      $this->paged = $path_args['page'];
+      $this->paged = $url_args['page'];
     }
 
     if (!isset($this->url_args['multi'])) {
@@ -53,8 +53,8 @@ class sifRequest {
         if (!preg_match("/^\d+$/", $this->paged)) {
           $this->url_args['page'] = $this->nav_info['navigation_page'] + 1;
         }
-        $navigation_last_page = $nav_info['navigation_last_page'];
-        if (($this->nav_info['timestamp'] < strtotime("-$timeout minutes")) || ($this->url_args['page'] > $navigation_last_page && $navigation_last_page != -1)) {
+        $navigation_last_page = $this->nav_info['navigation_last_page'];
+        if (($this->nav_info['timestamp'] < strtotime("-$this->timeout minutes")) || ($this->url_args['page'] > $navigation_last_page && $navigation_last_page != -1)) {
           $this->paged_active = FALSE;
         }
       }

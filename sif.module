@@ -73,16 +73,16 @@ function sif_guid() {
  * Generic function to GET a SIF object
  * @param  string $type
  *   Object type we are querying.
- * @param  string $id
- *   The ID of the object to query for.
- * @param  string $path
- *   Additional path (needed for queues).
- * @param  int    $page
- *   The page number of the results to query.
- * @param  int    $per_page
- *   The number of results to show per page.
- * @param  string $zone 
- *   The zone to use. Default used if not set.
+ * @param  array $path_args
+ *   Arguments to be put in the SIF request URL. Possible values are:
+ *     - zoneId - The zone to be queried in
+ *     - deleteMessageId - The message to delete from the queue
+ *     - page - Which page to query
+ *     - pageSize - How many results per page
+ *     - path - Any additional path
+ *     - id - The refId being queried
+ *     - multi - If this is a query for multiple items
+ *     - queryIntention - UNDEFINED or QUERYING_ALL_PAGES
  * @param  string $environment
  *   The environment to query within (uses default otherwise).
  * @return mixed          
@@ -141,11 +141,17 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
  *   Object type we are querying.
  * @param  string $xml
  *   The XML for the query.
- * @param  bool   $multi
- *   True if this is a query for multiple objects.
- * @param  string $zone 
- *   The zone to use. Default used if not set.
- * @param  string $environment
+ * @param  array $path_args
+ *   Arguments to be put in the SIF request URL. Possible values are:
+ *     - zoneId - The zone to be queried in
+ *     - deleteMessageId - The message to delete from the queue
+ *     - page - Which page to query
+ *     - pageSize - How many results per page
+ *     - path - Any additional path
+ *     - id - The refId being queried
+ *     - multi - If this is a query for multiple items
+ *     - queryIntention - UNDEFINED or QUERYING_ALL_PAGES
+ * * @param  string $environment
  *   The environment to query within (uses default otherwise).
  * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
@@ -182,10 +188,16 @@ function sif_post($type, $xml = NULL, $path_args = array(), $environment = NULL)
  *   Object type we are querying.
  * @param  string $xml
  *   The XML for the query.
- * @param  string $id
- *   The ID of the object to query for.
- * @param  string $zone 
- *   The zone to use. Default used if not set.
+ * @param  array $path_args
+ *   Arguments to be put in the SIF request URL. Possible values are:
+ *     - zoneId - The zone to be queried in
+ *     - deleteMessageId - The message to delete from the queue
+ *     - page - Which page to query
+ *     - pageSize - How many results per page
+ *     - path - Any additional path
+ *     - id - The refId being queried
+ *     - multi - If this is a query for multiple items
+ *     - queryIntention - UNDEFINED or QUERYING_ALL_PAGES
  * @param  string $environment
  *   The environment to query within (uses default otherwise).
  * @return mixed
@@ -219,10 +231,16 @@ function sif_put($type, $xml, $path_args = array(), $environment = NULL) {
  *   Object type we are querying.
  * @param  string $xml
  *   The XML for the query.
- * @param  string $id
- *   The ID of the object to query for.
- * @param  string $zone 
- *   The zone to use. Default used if not set.
+ * @param  array $path_args
+ *   Arguments to be put in the SIF request URL. Possible values are:
+ *     - zoneId - The zone to be queried in
+ *     - deleteMessageId - The message to delete from the queue
+ *     - page - Which page to query
+ *     - pageSize - How many results per page
+ *     - path - Any additional path
+ *     - id - The refId being queried
+ *     - multi - If this is a query for multiple items
+ *     - queryIntention - UNDEFINED or QUERYING_ALL_PAGES
  * @param  string $environment
  *   The environment to query within (uses default otherwise).
  * @return mixed
@@ -256,6 +274,8 @@ function sif_delete($type, $xml = NULL, $path_args = array(), $environment = NUL
  *   Type of data object
  * @param  string $xml
  *   The XML representing the object
+ * @param array $headers
+ *   The headers from the request
  * @return boolean
  *   True on success, false on failure
  */
@@ -330,6 +350,8 @@ function sif_load($id) {
  *   Response object
  * @param  string $type
  *   Type of request
+ * @param bool $two_oh_four_error
+ *   Whether a 204 response should be considered an error or not
  * @return mixed
  *   The error associated with that code or false on an OK
  */
