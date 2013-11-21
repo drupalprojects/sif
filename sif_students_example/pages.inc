@@ -13,10 +13,8 @@ function sif_students_example_page(){
   $rows = array();
 
   if (isset($result['sif_data_object'])) {
-    foreach ($result['sif_data_object'] as $object){
-      $object_ids = array_keys($result['sif_data_object']);
-      $students = entity_load('sif_data_object', $object_ids);
-    }
+    $object_ids = array_keys($result['sif_data_object']);
+    $students = entity_load('sif_data_object', $object_ids);
     foreach ($students as $student){
       $row = array();
       $row[] = l($student->name['fullName'], "sif/$student->id");

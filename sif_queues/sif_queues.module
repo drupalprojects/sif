@@ -119,10 +119,8 @@ function sif_queues_cron() {
   $result = $query->execute();
 
   if (isset($result['sif_data_object'])) {
-    foreach ($result['sif_data_object'] as $object){
-      $object_ids = array_keys($result['sif_data_object']);
-      $queues = entity_load('sif_data_object', $object_ids);
-    }
+    $object_ids = array_keys($result['sif_data_object']);
+    $queues = entity_load('sif_data_object', $object_ids);
     foreach ($queues as $queue){
       $timing = variable_get('sif_queue_' . $queue->id, array('length' => 1, 'period' => 'hour', 'status' => 'enabled', 'last' => time(), 'drupalqueue' => 0));
       if (time() >= strtotime('plus ' . $timing['length'] . ' ' . $timing['period'], $timing['last'])) {

@@ -13,10 +13,8 @@ function sif_zones_page(){
   $rows = array();
 
   if (isset($result['sif_data_object'])) {
-    foreach ($result['sif_data_object'] as $object){
-      $object_ids = array_keys($result['sif_data_object']);
-      $zones = entity_load('sif_data_object', $object_ids);
-    }
+    $object_ids = array_keys($result['sif_data_object']);
+    $zones = entity_load('sif_data_object', $object_ids);
     foreach ($zones as $zone){
       $row = array();
       $row[] = l($zone->id, "sif/$zone->id");

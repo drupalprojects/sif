@@ -13,10 +13,8 @@ function sif_queues_page(){
   $rows = array();
 
   if (isset($result['sif_data_object'])) {
-    foreach ($result['sif_data_object'] as $object){
-      $object_ids = array_keys($result['sif_data_object']);
-      $queues = entity_load('sif_data_object', $object_ids);
-    }
+    $object_ids = array_keys($result['sif_data_object']);
+    $queues = entity_load('sif_data_object', $object_ids);
     foreach ($queues as $queue){
       $row = array();
       $row[] = l($queue->name, "sif/$queue->id");

@@ -17,10 +17,8 @@ function sif_ui_environments(){
   $rows = array();
 
   if (isset($result['sif_data_object'])) {
-    foreach ($result['sif_data_object'] as $object){
-      $object_ids = array_keys($result['sif_data_object']);
-      $environments = entity_load('sif_data_object', $object_ids);
-    }
+    $object_ids = array_keys($result['sif_data_object']);
+    $environments = entity_load('sif_data_object', $object_ids);
     $default_env = variable_get('sif_default_environment_id');
     foreach ($environments as $environment){
       $row = array();
