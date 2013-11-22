@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Page that shows the available SIF object types
+ */
 
 /**
  * Data Object Types overview page.

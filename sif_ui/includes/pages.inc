@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Pages that constitute the basic SIF UI
+ */
 
 /**
  * Page callback for sif/%sif_object
@@ -24,7 +28,8 @@ function sif_object_view($sif, $view_mode = 'details') {
       '#title' => t('Data Object ID'),
       '#markup' => $sif->id,
     );
-  } elseif ($view_mode == 'xml') {
+  }
+  elseif ($view_mode == 'xml') {
     $build['xml'] = array(
       '#type' => 'item',
       '#title' => t('XML'),
@@ -92,7 +97,8 @@ function sif_object_delete_form_validate($form, &$form_state) {
         }
       }
       drupal_set_message(t('Successfully deleted from server'));
-    } else {
+    }
+    else {
       form_set_error('delete_from_server', t('Unable to delete from server. See above error'));
     }
   }
@@ -127,13 +133,15 @@ function sif_service_view($sif, $name) {
     ),
   );
   $response = drupal_http_request($url, $options);
-  if ($response->code != "200"){
+  if ($response->code != "200") {
     if (property_exists($response, 'data')) {
-      drupal_set_message(t('POST unsuccessful: !message', array('!message' => strip_tags($response->data))));
-    } else {
-      drupal_set_message(t('POST unsuccessful: code: !code, error: !error', array('!code' => strip_tags($response->code), '!error' => strip_tags($response->error))));
+      drupal_set_message(t('POST unsuccessful: @message', array('@message' => strip_tags($response->data))));
     }
-  } else {
+    else {
+      drupal_set_message(t('POST unsuccessful: code: @code, error: @error', array('@code' => strip_tags($response->code), '@error' => strip_tags($response->error))));
+    }
+  }
+  else {
     return clean_xml($response->data, TRUE);
   }
   return t('Problem viewing sevice');;

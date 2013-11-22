@@ -1,9 +1,13 @@
 <?php
+/**
+ * @file
+ * Pages for the SIF queues
+ */
 
 /**
  * Queues Page
  */
-function sif_queues_page(){
+function sif_queues_page() {
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'sif_data_object')
@@ -15,7 +19,7 @@ function sif_queues_page(){
   if (isset($result['sif_data_object'])) {
     $object_ids = array_keys($result['sif_data_object']);
     $queues = entity_load('sif_data_object', $object_ids);
-    foreach ($queues as $queue){
+    foreach ($queues as $queue) {
       $row = array();
       $row[] = l($queue->name, "sif/$queue->id");
       $row[] = $queue->messageCount;
@@ -58,7 +62,7 @@ function sif_queues_page(){
 /**
  * Create Queues Form
  */
-function sif_queues_create(){
+function sif_queues_create() {
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
@@ -100,7 +104,8 @@ function sif_queues_create_validate($form, &$form_state) {
 
   if (!$results) {
     form_set_error('xml', t('Error processing request. See above errors.'));
-  } else {
+  }
+  else {
     form_set_value($form['xml'], $results->data, $form_state);
     form_set_value($form['headers'], $results->headers, $form_state);
   }
@@ -113,7 +118,7 @@ function sif_queues_create_submit($form, &$form_state) {
   // Save Environment entity.
   $success = sif_store('queue', $form_state['values']['xml'], $form_state['values']['headers']);
 
-  if ($success){
+  if ($success) {
     $form_state['redirect'] = 'admin/sif/queues';
   }
 }
@@ -121,7 +126,7 @@ function sif_queues_create_submit($form, &$form_state) {
 /**
  * Generate a new environment XML object for POSTing
  */
-function sif_queues_create_xml($name, $type){
+function sif_queues_create_xml($name, $type) {
   return <<<XML
 <queue type="$type">
   <name>$name</name>
@@ -132,7 +137,7 @@ XML;
 /**
  * Get Queues Form
  */
-function sif_queues_get(){
+function sif_queues_get() {
   $form['note'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('Load all queues from the server.  This will update any existing queues as well.') . '</p>',
@@ -152,15 +157,15 @@ function sif_queues_get(){
 /**
  * Get Queues Form
  */
-function sif_queues_get_submit(){
+function sif_queues_get_submit() {
   $response = sif_get('queue', array('multi' => TRUE));
   $xml = $response->data;
   $queues = new SimpleXMLElement($xml);
-  foreach ($queues->queue as $i => $queue){
+  foreach ($queues->queue as $i => $queue) {
     sif_store('queue',  $queue->asXML(), $response->headers);
     $queue_found = TRUE;
   }
-  if (!isset($queue_found)){
+  if (!isset($queue_found)) {
     drupal_set_message(t('No queues were found.'));
   }
   drupal_goto('admin/sif/queues');
@@ -169,7 +174,7 @@ function sif_queues_get_submit(){
 /**
  * Schedule Queues Form
  */
-function sif_queues_schedule($form, &$form_state, $queue){
+function sif_queues_schedule($form, &$form_state, $queue) {
   $current_settings = variable_get('sif_queue_' . $queue, array('length' => '1', 'period' => 'hours', 'status' => 'enabled', 'drupalqueue' => 0));
   $form['queue'] = array(
     '#type' => 'hidden',

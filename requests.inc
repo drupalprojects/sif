@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Class sifRequest definition
+ */
 
 class sifRequest {
   // Set up URL argument types

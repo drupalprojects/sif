@@ -34,7 +34,7 @@ function sif_data_object_entity_info() {
   foreach ($objects as $type => $name) {
 
     // Backwards compatible
-    if (is_array($name)){
+    if (is_array($name)) {
       $name = $name['name'];
       $properties = $name['properties'];
     }
@@ -54,7 +54,7 @@ function sif_data_object_entity_info() {
 /**
  * Implements hook_sif_data_object_types()
  */
-function sif_data_object_sif_data_object_types(){
+function sif_data_object_sif_data_object_types() {
   return array(
     'environment' => array(
       'name' => t('Environment'),
@@ -101,11 +101,12 @@ function sif_data_object_sif_data_object_types(){
 /**
  * Helper to get a types info
  */
-function sif_data_object_get_types($type = NULL){
+function sif_data_object_get_types($type = NULL) {
   $objects = module_invoke_all('sif_data_object_types');
   if ($type) {
     return $objects['type'];
-  } else {
+  }
+  else {
     return $objects;
   }
 }

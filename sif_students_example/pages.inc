@@ -1,9 +1,13 @@
 <?php
+/**
+ * @file
+ * Pages for the sif_students_example module
+ */
 
 /**
  * Students Page
  */
-function sif_students_example_page(){
+function sif_students_example_page() {
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'sif_data_object')
@@ -15,13 +19,14 @@ function sif_students_example_page(){
   if (isset($result['sif_data_object'])) {
     $object_ids = array_keys($result['sif_data_object']);
     $students = entity_load('sif_data_object', $object_ids);
-    foreach ($students as $student){
+    foreach ($students as $student) {
       $row = array();
       $row[] = l($student->name['fullName'], "sif/$student->id");
       $row[] = $student->localId;
       if (isset($student->demographics['sexus'])) {
         $row[] = $student->demographics['sexus'];
-      } else {
+      }
+      else {
         $row[] = '';
       }
 
@@ -53,7 +58,7 @@ function sif_students_example_page(){
 /**
  * Create Students Form
  */
-function sif_students_example_create(){
+function sif_students_example_create() {
   $form['#tree'] = TRUE;
   $form['full_name'] = array(
     '#type' => 'textfield',
@@ -185,7 +190,8 @@ function sif_students_example_create_validate($form, &$form_state) {
 
   if (!$results) {
     form_set_error('xml', t('Error processing request. See above errors.'));
-  } else {
+  }
+  else {
     form_set_value($form['xml'], $results->data, $form_state);
     form_set_value($form['headers'], $results->headers, $form_state);
   }
@@ -198,7 +204,7 @@ function sif_students_example_create_submit($form, &$form_state) {
   // Save Environment entity.
   $success = sif_store('student', $form_state['values']['xml'], $form_state['values']['headers']);
 
-  if ($success){
+  if ($success) {
     $form_state['redirect'] = 'sif/students';
   }
 }
@@ -207,9 +213,9 @@ function sif_students_example_create_submit($form, &$form_state) {
 /**
  * Generate a new environment XML object for POSTing
  */
-function sif_students_example_create_xml(&$form_state){
+function sif_students_example_create_xml(&$form_state) {
   $emails = '';
-  if (!empty($form_state['num_emails'])){
+  if (!empty($form_state['num_emails'])) {
     for ($i = 0; $i < $form_state['num_emails']; $i++) {
       $email_type = $form_state['values']['emails_fieldset']['email_type'][$i];
       $email = $form_state['values']['emails_fieldset']['email'][$i];
@@ -249,7 +255,7 @@ XML;
 /**
  * Get Students Form
  */
-function sif_students_example_get(){
+function sif_students_example_get() {
   $form['note'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('Load all students from the server.  This will update any existing students as well.') . '</p>',
@@ -270,17 +276,17 @@ function sif_students_example_get(){
 /**
  * Get Students Form
  */
-function sif_students_example_get_submit(){
+function sif_students_example_get_submit() {
   $student_found = FALSE;
   if ($response = sif_get('student', array('multi' => TRUE))) {
     $xml = $response->data;
     $students = new SimpleXMLElement($xml);
-    foreach ($students->student as $i => $student){
+    foreach ($students->student as $i => $student) {
       sif_store('student',  $student->asXML(), $response->headers);
       $student_found = TRUE;
     }
   }
-  if (!$student_found){
+  if (!$student_found) {
     drupal_set_message(t('No students were found.'));
   }
   drupal_goto('sif/students');

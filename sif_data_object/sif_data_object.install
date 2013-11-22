@@ -8,7 +8,7 @@
 /**
  * Implements hook_schema()
  */
-function sif_data_object_schema(){
+function sif_data_object_schema() {
  $schema['sif_data_object'] = array(
     'description' => 'The base table for SIF Data Objects.',
     'fields' => array(

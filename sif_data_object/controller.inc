@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @file
+ * Class that extends EntityAPIController to add our customizations
+ */
 
 /**
  * A controller extending EntityAPIController.
@@ -13,7 +16,7 @@ class SifEntityAPIController extends EntityAPIController {
   public function load($ids = array(), $conditions = array()) {
     $entities = parent::load($ids, $conditions);
     $types = sif_data_object_get_types();
-    foreach ($entities as &$entity){
+    foreach ($entities as &$entity) {
 
       // Give all entities a SimpleXML object
       $entity->data = new SimpleXMLElement($entity->xml);
@@ -67,7 +70,7 @@ class SifEntityAPIController extends EntityAPIController {
     $saved = parent::save($entity, $transaction);
     if ($saved) {
       // @TODO: move to post_save_TYPE() "hook"
-      switch ($entity->type){
+      switch ($entity->type) {
         case 'environment':
           if (!variable_get('sif_default_environment_id')) {
             $data = new SimpleXMLElement($entity->xml);
@@ -91,17 +94,17 @@ class SifEntityAPIController extends EntityAPIController {
   /**
    * Load Environment
    */
-  private function load_environment(&$entity, $ids = array(), $conditions = array()){
+  private function load_environment(&$entity, $ids = array(), $conditions = array()) {
 
     // Infrastructure Services
     $entity->infrastructureServices = array();
-    foreach ($entity->data->infrastructureServices->infrastructureService as $s){
+    foreach ($entity->data->infrastructureServices->infrastructureService as $s) {
       $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
     }
 
     // Provisioned Zones and Rights
     $entity->provisionedZones = array();
-    foreach ($entity->data->provisionedZones->provisionedZone as $s){
+    foreach ($entity->data->provisionedZones->provisionedZone as $s) {
       $id = (string) $s->attributes()->id;
 
       // Array of Services
@@ -113,7 +116,7 @@ class SifEntityAPIController extends EntityAPIController {
         $service_name = (string) $service->attributes()->name;
         $entity->provisionedZones[$id]['services'][$service_name] = array();
         $entity->provisionedZones[$id]['services'][$service_name]['rights'] = array();
-        foreach ($service->rights->right as $right){
+        foreach ($service->rights->right as $right) {
           $right_type = (string) $right->attributes()->type;
           $entity->provisionedZones[$id]['services'][$service_name]['rights'][$right_type] = (string) $right;
         }
@@ -127,7 +130,7 @@ class SifEntityAPIController extends EntityAPIController {
   /**
    * Load Queue
    */
-  private function load_queue(&$entity, $ids = array(), $conditions = array()){
+  private function load_queue(&$entity, $ids = array(), $conditions = array()) {
     $entity->pollingType = $entity->data->attributes()->type;
   }
 

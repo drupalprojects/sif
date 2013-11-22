@@ -79,7 +79,7 @@ function sif_settings_form($form, &$form_state) {
 function sif_settings_form_validate($form, &$form_state) {
 
   // Check if this is a valid URL
-  if (!valid_url($form_state['values']['sif_server'])){
+  if (!valid_url($form_state['values']['sif_server'])) {
     form_set_error('sif_server', t('You have entered an invalid URL. Please try again.'));
   }
 

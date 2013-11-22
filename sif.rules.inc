@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ * Defines rules for SIF module
+ */
+
 function sif_rules_event_info() {
   $items = array(
     'sif_before_request' => array(

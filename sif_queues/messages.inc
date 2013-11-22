@@ -1,9 +1,13 @@
 <?php
+/**
+ * @file
+ * Pages for getting a message
+ */
 
 /**
  * Get Queues Form
  */
-function sif_queues_get_messages(){
+function sif_queues_get_messages() {
   $form['note'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('Load all messages from this queue.') . '</p>',
@@ -18,7 +22,7 @@ function sif_queues_get_messages(){
 /**
  * Submit handler for sif_queues_get_messages();
  */
-function sif_queues_get_messages_submit(){
+function sif_queues_get_messages_submit() {
   $id = arg(1);
   $queues = entity_load('sif_data_object', array($id));
   $queue = $queues[$id];
@@ -26,10 +30,11 @@ function sif_queues_get_messages_submit(){
 
   $messages = sif_get('queue', array('id' => $id, 'path' => 'messages', 'multi' => TRUE, 'deleteMessageId' => $last_message));
 
-  if (empty($messages->data)){
+  if (empty($messages->data)) {
     variable_set("sif_queue_last_$id", '');
-    drupal_set_message('There were no messages in the queue.', 'notice');
-  } else {
+    drupal_set_message(t('There were no messages in the queue.'), 'notice');
+  }
+  else {
     $object = new SimpleXMLElement($messages->data);
     foreach ($object->children() as $type => $xml) {
       $object_id = (string) $xml->attributes()->refId;

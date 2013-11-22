@@ -1,13 +1,13 @@
 <?php
-
 /**
- * @file environments.inc
+ * @file
+ * Pages for the environments
  */
 
 /**
  * Environments management page.
  */
-function sif_ui_environments(){
+function sif_ui_environments() {
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'sif_data_object')
@@ -20,7 +20,7 @@ function sif_ui_environments(){
     $object_ids = array_keys($result['sif_data_object']);
     $environments = entity_load('sif_data_object', $object_ids);
     $default_env = variable_get('sif_default_environment_id');
-    foreach ($environments as $environment){
+    foreach ($environments as $environment) {
       $row = array();
       $row[] = l($environment->consumerName, "sif/$environment->id");
       $row[] = $environment->solutionId;
@@ -38,7 +38,7 @@ function sif_ui_environments(){
       $items = array();
       foreach ($environment->provisionedZones[$environment->defaultZoneId]['services'] as $service_name => $service) {
         $children = array();
-        foreach ($service['rights'] as $right => $status){
+        foreach ($service['rights'] as $right => $status) {
           $children[] = "$right: $status";
         }
         $items[] = array(
@@ -51,7 +51,8 @@ function sif_ui_environments(){
       //$row[] = $environment->id;
       if ($environment->id == $default_env) {
         $row[] = t('DEFAULT');
-      } else {
+      }
+      else {
         $form = drupal_get_form('sif_ui_default_set', $environment->id);
         $row[] = drupal_render($form);
       }
@@ -77,7 +78,7 @@ function sif_ui_environments(){
 /**
  * Create Environment form.
  */
-function sif_ui_environment_create(){
+function sif_ui_environment_create() {
   $form['consumer_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Consumer Name'),
@@ -116,7 +117,8 @@ function sif_ui_environment_create_validate($form, &$form_state) {
 
   if (!$results) {
     form_set_error('xml', t('Error processing request. See above errors.'));
-  } else {
+  }
+  else {
     form_set_value($form['xml'], $results->data, $form_state);
     form_set_value($form['headers'], $results->headers, $form_state);
   }
@@ -129,7 +131,7 @@ function sif_ui_environment_create_submit($form, &$form_state) {
   // Save Environment entity.
   $success = sif_store('environment', $form_state['values']['xml'], $form_state['values']['headers']);
 
-  if ($success){
+  if ($success) {
     //$sif_object = sif_data_object_load();
     //$default_env = variable_get('sif_default_environment_id');
     //if (!$default_env) {
@@ -166,17 +168,17 @@ function sif_ui_default_set_submit($form, &$form_state) {
 /**
  * Generate a new environment XML object for POSTing
  */
-function sif_environment_xml($consumerName, $solutionId){
-  $applicationKey = sif_get_application_key();
+function sif_environment_xml($consumer_name, $solution_id) {
+  $application_key = sif_get_application_key();
   return <<<XML
 <environment>
-  <solutionId>$solutionId</solutionId>
+  <solutionId>$solution_id</solutionId>
   <authenticationMethod>Basic</authenticationMethod>
   <instanceId></instanceId>
   <userToken></userToken>
-  <consumerName>$consumerName</consumerName>
+  <consumerName>$consumer_name</consumerName>
   <applicationInfo>
-    <applicationKey>$applicationKey</applicationKey>
+    <applicationKey>$application_key</applicationKey>
     <supportedInfrastructureVersion>3.0</supportedInfrastructureVersion>
     <supportedDataModel>SIF-US</supportedDataModel>
     <supportedDataModelVersion>3.0</supportedDataModelVersion>

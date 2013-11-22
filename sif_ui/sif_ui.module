@@ -132,6 +132,6 @@ function sif_object_load_multiple($sif_ids = array(), $conditions = array()) {
 /**
  *
  */
-function sif_object_access($action = 'view', $sif){
+function sif_object_access($action = 'view', $sif) {
   return user_access('configure sif');
 }

@@ -32,9 +32,10 @@ function sif_get_application_key($token = NULL) {
   }
   if (!$token && $env_id) {
     $entities = entity_load('sif_data_object', array($env_id));
-    if (isset($entities[$env_id])){
+    if (isset($entities[$env_id])) {
       $token = $entities[$env_id]->sessionToken;
-    } else {
+    }
+    else {
       $token = variable_get('sif_server_auth_token', 'new');
     }
   }
@@ -45,14 +46,15 @@ function sif_get_application_key($token = NULL) {
 /**
  * Helper to get human readable XML
  */
-function clean_xml($xml, $html_encode = FALSE){
-  $simpleXml = new SimpleXMLElement($xml);
-  $dom = dom_import_simplexml($simpleXml)->ownerDocument;
-  $dom->formatOutput = true;
+function clean_xml($xml, $html_encode = FALSE) {
+  $simple_xml = new SimpleXMLElement($xml);
+  $dom = dom_import_simplexml($simple_xml)->ownerDocument;
+  $dom->formatOutput = TRUE;
   $output = $dom->saveXML();
-  if ($html_encode){
+  if ($html_encode) {
     return '<pre>' . htmlspecialchars($output) . '</pre>';
-  } else {
+  }
+  else {
     return $output;
   }
 }
@@ -63,7 +65,7 @@ function clean_xml($xml, $html_encode = FALSE){
  *   A randomly generated GUID
  */
 function sif_guid() {
-  if (function_exists('com_create_guid') === true) {
+  if (function_exists('com_create_guid')) {
     return trim(com_create_guid(), '{}');
   }
   return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
@@ -92,7 +94,7 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
   $request = new sifRequest('GET', $type, $path_args, $environment);
   
   if ($request->paged) {
-    if(!$request->paged_active) {
+    if (!$request->paged_active) {
       drupal_set_message(t('No more pages available.'));
       return FALSE;
     }
@@ -108,7 +110,8 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
 
     if (sif_error_check($response, 'GET', $two_oh_four_error)) {
       return FALSE;
-    } else {
+    }
+    else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
           return $response;
@@ -129,7 +132,8 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
       }
       return TRUE;
     }
-  } else {
+  }
+  else {
     drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
     return FALSE;
   }
@@ -168,7 +172,8 @@ function sif_post($type, $xml = NULL, $path_args = array(), $environment = NULL)
 
     if (sif_error_check($response, 'POST')) {
       return FALSE;
-    } else {
+    }
+    else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
           return $response;
@@ -176,7 +181,8 @@ function sif_post($type, $xml = NULL, $path_args = array(), $environment = NULL)
       }
       return TRUE;
     }
-  } else {
+  }
+  else {
     drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
     return FALSE;
   }
@@ -211,7 +217,8 @@ function sif_put($type, $xml, $path_args = array(), $environment = NULL) {
 
     if (sif_error_check($response, 'PUT')) {
       return FALSE;
-    } else {
+    }
+    else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
           return $response;
@@ -219,7 +226,8 @@ function sif_put($type, $xml, $path_args = array(), $environment = NULL) {
       }
       return TRUE;
     }
-  } else {
+  }
+  else {
     drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
     return FALSE;
   }
@@ -252,9 +260,10 @@ function sif_delete($type, $xml = NULL, $path_args = array(), $environment = NUL
   if ($request->environment) {
     $response = $request->sif_request($xml);
 
-    if (sif_error_check($response, 'DELETE')){
+    if (sif_error_check($response, 'DELETE')) {
       return FALSE;
-    } else {
+    }
+    else {
       if (property_exists($response, 'data')) {
         if ($response->data) {
           return $response;
@@ -262,7 +271,8 @@ function sif_delete($type, $xml = NULL, $path_args = array(), $environment = NUL
       }
       return TRUE;
     }
-  } else {
+  }
+  else {
     drupal_set_message(t('No environment selected. Either explicitly call an environment, or set a default.'));
     return FALSE;
   }
@@ -291,11 +301,12 @@ function sif_store($type, $xml, $headers) {
     'headers' => serialize($headers),
   );
   $entity = entity_create('sif_data_object', $values);
-  if (entity_save('sif_data_object', $entity)){
+  if (entity_save('sif_data_object', $entity)) {
     module_invoke_all('sif_after_store', $type, $id);
     drupal_set_message(t('SIF %type object was saved.', array('%type' => $entity->type)));
     return TRUE;
-  } else {
+  }
+  else {
     drupal_set_message(t('Entity not created! Something went wrong.'), 'error');
     return FALSE;
   }
@@ -310,7 +321,7 @@ function sif_store($type, $xml, $headers) {
  * @return boolean
  *   True on success, false on failure
  */
-function sif_local_delete($type, $id){
+function sif_local_delete($type, $id) {
   $args = array(
     '@type' => $type,
     '%title' => $id,
@@ -321,7 +332,8 @@ function sif_local_delete($type, $id){
     watchdog('sif', 'SIF @type %title has been deleted from the local database.', $args);
     drupal_set_message(t('SIF @type %title has been deleted from the local database.', $args));
     return TRUE;
-  } else {
+  }
+  else {
     watchdog('sif', 'SIF @type %title has NOT been deleted from the local database.', $args, WATCHDOG_ERROR);
     drupal_set_message(t('SIF @type %title has NOT been deleted from the local database.', $args), 'error');
     return FALSE;
@@ -339,7 +351,8 @@ function sif_load($id) {
   $entities = entity_load('sif_data_object', array($id));
   if (isset($entities[$id])) {
     return $entities[$id];
-  } else {
+  }
+  else {
     return FALSE;
   }
 }
@@ -364,16 +377,19 @@ function sif_error_check(&$response, $type, $two_oh_four_error = FALSE) {
 
   if ($two_oh_four_error && $response->code == '204') { // TODO: get rid of this cludginess
     return TRUE;
-  } else {
+  }
+  else {
     if (isset($statuses[$response->code])) {
       return FALSE;
-    } else {
+    }
+    else {
       $error = $response->error;
 
       if (property_exists($response, 'data')) {
-        drupal_set_message(t("$type unsuccessful: !message", array('!message' => strip_tags($response->data))));
-      } else {
-        drupal_set_message(t("$type unsuccessful: code: !code, error: !error", array('!code' => strip_tags($response->code), '!error' => $error)));
+        drupal_set_message(t('@type unsuccessful: @message', array('@type' => $type, '@message' => strip_tags($response->data))));
+      }
+      else {
+        drupal_set_message(t('@type unsuccessful: code: @code, error: @error', array('@type' => $type, '@code' => strip_tags($response->code), '@error' => $error)));
       }
       
       return $error;
