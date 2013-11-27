@@ -8,18 +8,31 @@
  * Data Object Types overview page.
  */
 function sif_ui_data_object_types() {
-
   $objects = module_invoke_all('sif_data_object_types');
-  dpm($objects);
-  $header = array(t('Name'));
+
+  $header = array(
+    t('Name'),
+    t('SIF type'),
+    t('Properties'),
+  );
   $rows = array();
 
-  foreach ($objects as $key => $name) {
-    $type = $objects[$key];
-
-    $type_url_str = str_replace('_', '-', $key);
-    $row = array($name);
-    //$row[] = array('data' => l(t('Describe'), 'admin/sif/types/' . $type_url_str));
+  foreach ($objects as $type => $value) {
+    if (is_array($value)) {
+      $properties = implode(', ', $value['properties']);
+      $row = array(
+        $value['name'],
+        $type,
+        $properties,
+      );
+    }
+    else {
+      $row = array(
+        $value,
+        $type,
+        '',
+      );
+    }
     $rows[] = $row;
   }
 
