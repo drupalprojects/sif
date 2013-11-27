@@ -20,8 +20,9 @@ function sif_settings_form($form, &$form_state) {
   $form['sif_server_auth_type'] = array(
     '#type' => 'radios',
     '#title' => t('Authorization Type'),
-    '#description' => t('Choose the authorization type. Token/Secret is the sandbox style base64 encoded 2 step process. Simple Token is a token-only based authoriaztion where the token is acquired through another process.'),
+    '#description' => t('Choose the authorization type. Token/Secret is the sandbox style base64 encoded 2 step process. Simple Token is a token-only based authorization where the token is acquired through another process.'),
     '#options' => array('secret' => t('Token/Secret (Sandbox-style)'), 'token' => t('Simple Token')),
+    '#default_value' => variable_get('sif_server_auth_type', 'secret'),
     '#required' => TRUE,
   );
   $form['sif_server_auth_token'] = array(
