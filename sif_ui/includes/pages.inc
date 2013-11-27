@@ -89,7 +89,7 @@ function sif_object_delete_form_validate($form, &$form_state) {
       $sif_env = $sif_id;
     }
 
-    if ($response = sif_delete($type, NULL, array('id' => $sif_id, 'multi' => TRUE), $sif_env)) {
+    if ($response = sif_del($type, NULL, array('id' => $sif_id, 'multi' => TRUE), $sif_env)) {
       if ($type == 'environment') {
         // Unset the default environment if we are deleting the current default.
         if ($default == $sif_id) {
@@ -112,7 +112,7 @@ function sif_object_delete_form_submit($form, &$form_state) {
   $sif_object = $form_state['sif_object'];
   if ($form_state['values']['confirm']) {
     // Delete the entity
-    sif_local_delete($sif_object->type, $sif_id);
+    sif_local_del($sif_object->type, $sif_id);
   }
   $form_state['redirect'] = '<front>';
 }

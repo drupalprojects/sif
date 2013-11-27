@@ -289,7 +289,7 @@ function sif_put($type, $xml, $path_args = array(), $environment = NULL) {
  * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
  */
-function sif_delete($type, $xml = NULL, $path_args = array(), $environment = NULL) {
+function sif_del($type, $xml = NULL, $path_args = array(), $environment = NULL) {
   $request = new sifRequest('DELETE', $type, $path_args, $environment);
 
   if ($request->environment) {
@@ -356,7 +356,7 @@ function sif_store($type, $xml, $headers) {
  * @return boolean
  *   True on success, false on failure
  */
-function sif_local_delete($type, $id) {
+function sif_local_del($type, $id) {
   $args = array(
     '@type' => $type,
     '%title' => $id,
