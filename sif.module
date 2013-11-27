@@ -25,22 +25,57 @@ function sif_permission() {
  * Helper for generating our application key.
  */
 function sif_get_application_key($token = NULL) {
-  if (!$token) {
-    if (!$env_id = variable_get('sif_default_environment_id')) {
-      $token = variable_get('sif_server_auth_token', 'new');
+  $type = variable_get('sif_server_auth_type', 'secret');
+  if ($type == 'secret') {
+    if (!$token) {
+      if (!$env_id = variable_get('sif_default_environment_id')) {
+        $token = variable_get('sif_server_auth_token', 'new');
+      }
     }
+    if (!$token && $env_id) {
+      $entities = entity_load('sif_data_object', array($env_id));
+      if (isset($entities[$env_id])) {
+        $token = $entities[$env_id]->sessionToken;
+      }
+      else {
+        $token = variable_get('sif_server_auth_token', 'new');
+      }
+    }
+    $secret = variable_get('sif_server_auth_secret', 'guest');
+    return "Basic " . base64_encode($token . ':' . $secret);
   }
-  if (!$token && $env_id) {
-    $entities = entity_load('sif_data_object', array($env_id));
-    if (isset($entities[$env_id])) {
-      $token = $entities[$env_id]->sessionToken;
+  else if ($type == 'token') {
+    if ($token = variable_get('sif_server_auth_token', NULL)) {
+      $token = sif_decrypt($token);
     }
-    else {
-      $token = variable_get('sif_server_auth_token', 'new');
-    }
+    return $token;
   }
-  $secret = variable_get('sif_server_auth_secret', 'guest');
-  return "Basic " . base64_encode($token . ':' . $secret);
+}
+
+/**
+ * Helper for encrypting/decrypting data
+ */
+function sif_encrypt($data) {
+  $key = pack('H*', $drupal_hash_salt);
+  $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+  $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+  $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, $iv);
+  $ciphertext = $iv . $ciphertext;
+  $ciphertext_base64 = base64_encode($ciphertext);
+  return $ciphertext_base64;
+}
+
+/**
+ * Helper for decrypting data
+ */
+function sif_decrypt($data) {
+  $key = pack('H*', $drupal_hash_salt);
+  $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+  $ciphertext = base64_decode($data);
+  $iv = substr($ciphertext, 0, $iv_size);
+  $ciphertext = substr($ciphertext, $iv_size);
+  $plaintext = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $ciphertext, MCRYPT_MODE_CBC, $iv);
+  return $plaintext;
 }
 
 /**
