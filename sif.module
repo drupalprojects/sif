@@ -434,7 +434,7 @@ function sif_entity_info() {
     'sif_data_object' => array(
       'label' => t('SIF Data Object'),
       'controller class' => 'SifEntityAPIController',
-      'base table' => 'sif_data_object',
+      'base table' => 'sif_entity',
       'uri callback' => 'sif_object_uri',
       'entity keys' => array(
         'id' => 'id',
