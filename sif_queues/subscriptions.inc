@@ -120,7 +120,7 @@ function sif_subscriptions_create_submit($form, &$form_state) {
   $success = sif_store('subscription', $form_state['values']['xml'], $form_state['values']['headers']);
 
   if ($success) {
-    $form_state['redirect'] = "admin/sif/$queue/subscriptions";
+    $form_state['redirect'] = "admin/sif/queues/$queue/subscriptions";
   }
 }
 

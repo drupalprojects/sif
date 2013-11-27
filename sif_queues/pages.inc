@@ -30,7 +30,7 @@ function sif_queues_page() {
 
       $actions = array();
       $actions[] = l(t('View XML'), "sif/$queue->id/xml");
-      $actions[] = l(t('Subscriptions'), "admin/sif/$queue->id/subscriptions");
+      $actions[] = l(t('Subscriptions'), "admin/sif/queues/$queue->id/subscriptions");
       $actions[] = l(t('Delete'), "sif/$queue->id/delete", array('query' => array('destination' => 'admin/sif/queues')));
       $actions[] = l(t('Get Messages'), "sif/$queue->id/messages");
       $actions[] = l(t('Schedule'), "admin/sif/queues/$queue->id/schedule");
@@ -181,9 +181,9 @@ function sif_queues_schedule($form, &$form_state, $queue) {
     '#value' => $queue,
   );
   $form['schedule'] = array(
-    '#type' => 'fieldset', 
-    '#title' => t('Schedule'), 
-    '#attributes' => array('class' => array('container-inline')), 
+    '#type' => 'fieldset',
+    '#title' => t('Schedule'),
+    '#attributes' => array('class' => array('container-inline')),
     '#required' => TRUE,
   );
   $form['schedule']['length'] = array(

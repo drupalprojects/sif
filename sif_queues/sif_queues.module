@@ -58,29 +58,29 @@ function sif_queues_menu() {
   );
 
   // Subscriptions
-  $items['admin/sif/%/subscriptions'] = array(
+  $items['admin/sif/queues/%/subscriptions'] = array(
     'title' => 'Subscriptions',
     'description' => 'Create and manage SIF subscriptions.',
     'page callback' => 'sif_subscriptions_page',
-    'page arguments' => array(2),
+    'page arguments' => array(3),
     'access arguments' => array('configure sif'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'subscriptions.inc',
   );
-  $items['admin/sif/%/subscriptions/create'] = array(
+  $items['admin/sif/queues/%/subscriptions/create'] = array(
     'title' => 'Create Subscription',
     'description' => 'Create a new subscription.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('sif_subscriptions_create', 2),
+    'page arguments' => array('sif_subscriptions_create', 3),
     'access arguments' => array('configure sif'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'subscriptions.inc',
   );
-  $items['admin/sif/%/subscriptions/get'] = array(
+  $items['admin/sif/queues/%/subscriptions/get'] = array(
     'title' => 'Get or Update Subscriptions',
     'description' => 'Load all subscriptions from the SIF server.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('sif_subscriptions_get', 2),
+    'page arguments' => array('sif_subscriptions_get', 3),
     'access arguments' => array('configure sif'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'subscriptions.inc',
