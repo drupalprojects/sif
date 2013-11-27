@@ -122,12 +122,12 @@ function sif_guid() {
  *     - queryIntention - UNDEFINED or QUERYING_ALL_PAGES
  * @param  string $environment
  *   The environment to query within (uses default otherwise).
- * @return mixed          
+ * @return mixed
  *   False on error or no more messages in queue. TRUE or data on success.
  */
 function sif_get($type, $path_args = array(), $environment = NULL) {
   $request = new sifRequest('GET', $type, $path_args, $environment);
-  
+
   if ($request->paged) {
     if (!$request->paged_active) {
       drupal_set_message(t('No more pages available.'));
@@ -135,32 +135,27 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
     }
   }
 
-  $two_oh_four_error = FALSE;
-  if ($type == 'queue' || $request->paged) {
-    $two_oh_four_error = TRUE;
-  }
-
   if ($request->environment) {
-    $response = $request->sif_request();
+    $request->sif_request();
 
-    if (sif_error_check($response, 'GET', $two_oh_four_error)) {
+    if ($request->error) {
       return FALSE;
     }
     else {
-      if (property_exists($response, 'data')) {
-        if ($response->data) {
-          return $response;
+      if (property_exists($request->response, 'data')) {
+        if ($request->response->data) {
+          return $request->response;
         }
       }
-      if (property_exists($response, 'headers')) {
-        if ($response->headers['navigationId']) {
+      if (property_exists($request->response, 'headers')) {
+        if ($request->response->headers['navigationId']) {
           $nav_info['timestamp'] = time();
-          $nav_info['navigation_id'] = $response->headers['navigationId'];
-          if ($response->headers['navigationLastPage']) {
-            $nav_info['navigation_last_page'] = $response->headers['navigationLastPage'];
+          $nav_info['navigation_id'] = $request->response->headers['navigationId'];
+          if ($request->response->headers['navigationLastPage']) {
+            $nav_info['navigation_last_page'] = $request->esponse->headers['navigationLastPage'];
           }
-          if ($response->headers['navigationPage']) {
-            $nav_info['navigation_page'] = $response->headers['navigationPage'];
+          if ($request->response->headers['navigationPage']) {
+            $nav_info['navigation_page'] = $request->response->headers['navigationPage'];
           }
           variable_set("sif_nav_$request->query_stamp", $nav_info);
         }
@@ -203,15 +198,15 @@ function sif_post($type, $xml = NULL, $path_args = array(), $environment = NULL)
   $request = new sifRequest('POST', $type, $path_args, $environment);
 
   if ($request->environment) {
-    $response = $request->sif_request($xml);
+    $request->sif_request($xml);
 
-    if (sif_error_check($response, 'POST')) {
+    if ($request->error) {
       return FALSE;
     }
     else {
-      if (property_exists($response, 'data')) {
-        if ($response->data) {
-          return $response;
+      if (property_exists($request->response, 'data')) {
+        if ($request->response->data) {
+          return $request->response;
         }
       }
       return TRUE;
@@ -248,15 +243,15 @@ function sif_put($type, $xml, $path_args = array(), $environment = NULL) {
   $request = new sifRequest('PUT', $type, $path_args, $environment);
 
   if ($request->environment) {
-    $response = $request->sif_request($xml);
+    $request->sif_request($xml);
 
-    if (sif_error_check($response, 'PUT')) {
+    if ($request->error) {
       return FALSE;
     }
     else {
-      if (property_exists($response, 'data')) {
-        if ($response->data) {
-          return $response;
+      if (property_exists($request->response, 'data')) {
+        if ($request->response->data) {
+          return $request->response;
         }
       }
       return TRUE;
@@ -293,15 +288,15 @@ function sif_del($type, $xml = NULL, $path_args = array(), $environment = NULL) 
   $request = new sifRequest('DELETE', $type, $path_args, $environment);
 
   if ($request->environment) {
-    $response = $request->sif_request($xml);
+    $request->sif_request($xml);
 
-    if (sif_error_check($response, 'DELETE')) {
+    if ($request->error) {
       return FALSE;
     }
     else {
-      if (property_exists($response, 'data')) {
-        if ($response->data) {
-          return $response;
+      if (property_exists($request->response, 'data')) {
+        if ($request->response->data) {
+          return $request->response;
         }
       }
       return TRUE;
@@ -393,51 +388,11 @@ function sif_load($id) {
 }
 
 /**
- * Checks the error code for a correct error message
- * @param  string $response
- *   Response object
- * @param  string $type
- *   Type of request
- * @param bool $two_oh_four_error
- *   Whether a 204 response should be considered an error or not
- * @return mixed
- *   The error associated with that code or false on an OK
- */
-function sif_error_check(&$response, $type, $two_oh_four_error = FALSE) {
-  $statuses = array(
-    '200' => 'OK',
-    '201' => 'OK',
-    '204' => 'OK',
-  );
-
-  if ($two_oh_four_error && $response->code == '204') { // TODO: get rid of this cludginess
-    return TRUE;
-  }
-  else {
-    if (isset($statuses[$response->code])) {
-      return FALSE;
-    }
-    else {
-      $error = $response->error;
-
-      if (property_exists($response, 'data')) {
-        drupal_set_message(t('@type unsuccessful: @message', array('@type' => $type, '@message' => strip_tags($response->data))));
-      }
-      else {
-        drupal_set_message(t('@type unsuccessful: code: @code, error: @error', array('@type' => $type, '@code' => strip_tags($response->code), '@error' => $error)));
-      }
-      
-      return $error;
-    }
-  }
-}
-
-/**
  * logs requests to watchdog if this setting is turned on
  * @param  array  $options
  *   The options sent to drupal_http_request
  * @param  object $response
- *   The response object         
+ *   The response object
  */
 function sif_log($options, &$response) {
   $log_setting = variable_get('sif_connection_logging');
