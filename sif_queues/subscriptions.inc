@@ -62,7 +62,7 @@ function sif_subscriptions_page($queue) {
  * Create Subscriptions Form
  */
 function sif_subscriptions_create($form, &$form_state, $queue) {
-  $types = sif_data_object_get_types();
+  $types = sif_get_types();
   $types = array_keys($types);
   $types_select = array();
   foreach ($types as $type) {

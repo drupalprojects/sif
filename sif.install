@@ -2,14 +2,14 @@
 
 /**
  * @file
- * Install and Schema for sif_objects.module
+ * Install and Schema for sif.module
  */
 
 /**
  * Implements hook_schema()
  */
-function sif_data_object_schema() {
- $schema['sif_data_object'] = array(
+function sif_schema() {
+  $schema['sif_entity'] = array(
     'description' => 'The base table for SIF Data Objects.',
     'fields' => array(
       'id' => array(
@@ -53,5 +53,5 @@ function sif_data_object_schema() {
     ),
     'primary key' => array('id'),
   );
- return $schema;
+  return $schema;
 }

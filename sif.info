@@ -4,3 +4,4 @@ package = SIF
 core = 7.x
 
 files[] = requests.inc
+files[] = controller.inc

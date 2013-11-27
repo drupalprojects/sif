@@ -425,3 +425,113 @@ function sif_log($options, &$response) {
       ---- Error ---- !error', $args);
   }
 }
+
+/**
+ * Returns entity info
+ */
+function sif_entity_info() {
+  $return = array(
+    'sif_data_object' => array(
+      'label' => t('SIF Data Object'),
+      'controller class' => 'SifEntityAPIController',
+      'base table' => 'sif_data_object',
+      'uri callback' => 'sif_object_uri',
+      'entity keys' => array(
+        'id' => 'id',
+        'bundle' => 'type',
+      ),
+      'bundle keys' => array(
+        'bundle' => 'name',
+      ),
+      'bundles' => array(),
+      'view modes' => array(
+        'preview' => array(
+          'label' => t('Data Preview'),
+        ),
+        'xml' => array(
+          'label' => t('Raw XML'),
+        ),
+      ),
+    ),
+  );
+
+  $objects = module_invoke_all('sif_data_object_types');
+  foreach ($objects as $type => $name) {
+
+    // Backwards compatible
+    if (is_array($name)) {
+      $name = $name['name'];
+      $properties = $name['properties'];
+    }
+    $return['sif_data_object']['bundles'][$type] = array(
+      'label' => $name,
+      'admin' => array(
+        'path' => 'admin/sif/objects/%type',
+        'real path' => 'admin/sif/objects/' . $type,
+        'bundle argument' => 3,
+        'access arguments' => array('configure sif'),
+      ),
+    );
+  }
+  return $return;
+}
+
+/**
+ * Implements hook_sif_data_object_types()
+ */
+function sif_sif_data_object_types() {
+  return array(
+    'environment' => array(
+      'name' => t('Environment'),
+      'properties' => array(
+        'sessionToken',
+        'solutionId',
+        'defaultZoneId',
+        'consumerName',
+        'infrastructureServices',
+      ),
+    ),
+    'zone' => array(
+      'name' => t('Zone'),
+      'properties' => array(
+        'description',
+      ),
+    ),
+    'queue' => array(
+      'name' => t('Queue'),
+      'properties' => array(
+        'name',
+        'queueUri',
+        'idleTimeout',
+        'minWaitTime',
+        'messageCount',
+        'lastAccessed',
+        'lastModified',
+      ),
+    ),
+    'subscription' => array(
+      'name' => t('Subscription'),
+      'properties' => array(
+        'zoneId',
+        'contextId',
+        'serviceType',
+        'serviceName',
+        'queueId',
+      ),
+    ),
+    'alert' => t('Alert'),
+  );
+}
+
+/**
+ * Helper to get a types info
+ */
+function sif_get_types($type = NULL) {
+  $objects = module_invoke_all('sif_data_object_types');
+  if ($type) {
+    return $objects['type'];
+  }
+  else {
+    return $objects;
+  }
+}

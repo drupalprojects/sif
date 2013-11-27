@@ -15,7 +15,7 @@ class SifEntityAPIController extends EntityAPIController {
    */
   public function load($ids = array(), $conditions = array()) {
     $entities = parent::load($ids, $conditions);
-    $types = sif_data_object_get_types();
+    $types = sif_get_types();
     foreach ($entities as &$entity) {
 
       // Give all entities a SimpleXML object
@@ -49,7 +49,7 @@ class SifEntityAPIController extends EntityAPIController {
    */
   public function create(array $values = array()) {
     // Add is_new property only if we don't have this entity yet.
-    $created = db_query('SELECT created FROM {sif_data_object} WHERE id = :id', array(':id' => $values['id']))->fetchField();
+    $created = db_query('SELECT created FROM {sif_entity} WHERE id = :id', array(':id' => $values['id']))->fetchField();
     if ($created) {
       $values['created'] = $created;
       $values['changed'] = time();

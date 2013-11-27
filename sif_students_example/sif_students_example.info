@@ -4,4 +4,3 @@ package = SIF
 core = 7.x
 
 dependencies[] = sif
-dependencies[] = sif_data_object
