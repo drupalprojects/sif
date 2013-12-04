@@ -30,7 +30,7 @@ function sif_settings_form($form, &$form_state) {
     '#title' => t('Initial Token'),
     '#description' => t('Enter the token to access this server (Similar to a username).'),
     '#default_value' => variable_get('sif_server_auth_token', 'new'),
-    '#required' => TRUE,
+    '#required' => FALSE,
   );
   $form['sif_server_auth_secret'] = array(
     '#type' => 'textfield',
