@@ -359,6 +359,7 @@ function sif_local_del($type, $id) {
   entity_delete('sif_data_object', $id);
   if (!sif_load($id)) {
     // Report back success.
+    module_invoke_all('sif_after_del', $type, $id);
     watchdog('sif', 'SIF @type %title has been deleted from the local database.', $args);
     drupal_set_message(t('SIF @type %title has been deleted from the local database.', $args));
     return TRUE;
