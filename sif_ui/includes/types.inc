@@ -8,7 +8,7 @@
  * Data Object Types overview page.
  */
 function sif_ui_data_object_types() {
-  $objects = module_invoke_all('sif_data_object_types');
+  $objects = sif_get_types();
 
   $header = array(
     t('Name'),
@@ -19,7 +19,8 @@ function sif_ui_data_object_types() {
 
   foreach ($objects as $type => $value) {
     if (is_array($value)) {
-      $properties = implode(', ', $value['properties']);
+      $types = array_keys($value['properties']);
+      $properties = implode(', ', $types);
       $row = array(
         $value['name'],
         $type,

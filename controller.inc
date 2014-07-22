@@ -22,26 +22,78 @@ class SifEntityAPIController extends EntityAPIController {
       $entity->data = new SimpleXMLElement($entity->xml);
 
       // Reload headers as array
-      $entity->meta = unserialize((string) $entity->headers);
+      $entity->meta = unserialize(strval($entity->headers));
 
       // Load all desired properties
-      foreach ($types[$entity->type]['properties'] as $property) {
-        $entity->{$property} = (string) $entity->data->{$property};
-      }
+      foreach ($types[$entity->type]['properties'] as $property_name => $property) {
+        $items = $entity->data->xpath('/' . $entity->type . $property['path']);
 
-      // Look for helper function
-      $method = "load_" . $entity->type;
-      if (method_exists('SifEntityAPIController', $method)) {
-        $this->{$method}($entity, $ids, $conditions);
-      }
+        switch ($property['type']) {
+          case 'single':
+            $entity->{$property_name} = strval($items[0]);
+            break;
 
-      // Look for external helper functions
-      if (function_exists('sif_load_' . $entity->type)) {
-        $loader = 'sif_load_' . $entity->type;
-        $loader($entity, $ids, $conditions);
+          case 'multi':
+            $entity->{$property_name} = array();
+            foreach ($items as $item) {
+              $key = FALSE;
+              if (isset($property['key'])){
+                $key = strval($item->attributes()->{$property['key']});
+                $entity->{$property_name}[$key] = strval($item);
+              }
+              else {
+                $entity->{$property_name}[$key] = strval($item);
+              }
+            }
+            break;
+
+          case 'tree':
+            foreach ($items as $item) {
+              $iterator = new SimpleXMLIterator($item->asXML());
+
+              $keys = array();
+              foreach ($item->attributes() as $key => $value) {
+                $keys[] = $value;
+              }
+              $key = implode(':', $keys);
+              if ($key) {
+                $entity->{$property_name}[$key] = $this->tree_iterator($iterator);
+              }
+              else {
+                $entity->{$property_name} = $this->tree_iterator($iterator);
+              }
+            }
+            break;
+        }
       }
     }
     return $entities;
+  }
+
+  /**
+   * Iterates over XML to create an associative array representation
+   * @param $iterator
+   * @return array
+   */
+  private function tree_iterator($iterator) {
+    $arr = array();
+    for ($iterator->rewind(); $iterator->valid(); $iterator->next()) {
+      $keys = array();
+      foreach ($iterator->current()->attributes() as $key => $value) {
+        $keys[] = $value;
+      }
+      $key = implode(':', $keys);
+      if (!$key) {
+        $key = strval($iterator->key());
+      }
+      if ($iterator->hasChildren()) {
+        $arr[$key] = $this->tree_iterator($iterator->current());
+      }
+      else {
+        $arr[$key] = strval($iterator->current());
+      }
+    }
+    return $arr;
   }
 
   /**
@@ -74,75 +126,12 @@ class SifEntityAPIController extends EntityAPIController {
         case 'environment':
           if (!variable_get('sif_default_environment_id')) {
             $data = new SimpleXMLElement($entity->xml);
-            variable_set('sif_default_environment_id', (string) $data->attributes()->id);
+            variable_set('sif_default_environment_id', strval($data->attributes()->id));
           }
 
           break;
       }
     }
     return $saved;
-  }
-
-  /**
-   *
-   * BUNDLE HOOKS
-   *
-   * load_TYPE()
-   * @TODO save_TYPE()
-   */
-
-  /**
-   * Load Environment
-   */
-  private function load_environment(&$entity, $ids = array(), $conditions = array()) {
-
-    // Infrastructure Services
-    $entity->infrastructureServices = array();
-    foreach ($entity->data->infrastructureServices->infrastructureService as $s) {
-      $entity->infrastructureServices[(string) $s->attributes()->name] = (string) $s;
-    }
-
-    // Provisioned Zones and Rights
-    $entity->provisionedZones = array();
-    foreach ($entity->data->provisionedZones->provisionedZone as $s) {
-      $id = (string) $s->attributes()->id;
-
-      // Array of Services
-      $entity->provisionedZones[$id] = array();
-      $entity->provisionedZones[$id]['services'] = array();
-
-      foreach ($s->services->service as $service) {
-        // Array of Rights
-        $service_name = (string) $service->attributes()->name;
-        $entity->provisionedZones[$id]['services'][$service_name] = array();
-        $entity->provisionedZones[$id]['services'][$service_name]['rights'] = array();
-        foreach ($service->rights->right as $right) {
-          $right_type = (string) $right->attributes()->type;
-          $entity->provisionedZones[$id]['services'][$service_name]['rights'][$right_type] = (string) $right;
-        }
-      }
-    }
-
-    // Authorization key
-    $entity->authorizationToken = sif_get_application_key($entity->sessionToken);
-  }
-
-  /**
-   * Load Queue
-   */
-  private function load_queue(&$entity, $ids = array(), $conditions = array()) {
-    $entity->pollingType = $entity->data->attributes()->type;
-  }
-
-  /**
-   * Load Zone
-   */
-  private function load_zone(&$entity, $ids = array(), $conditions = array()) {
-    $entity->zone_properties = array();
-    if (property_exists($entity->data, 'properties')) {
-      foreach ($entity->data->properties->property as $property) {
-        $entity->zone_properties[(string) $property->attributes()->name] = (string) $property;
-      }
-    }
   }
 }

@@ -485,39 +485,107 @@ function sif_sif_data_object_types() {
     'environment' => array(
       'name' => t('Environment'),
       'properties' => array(
-        'sessionToken',
-        'solutionId',
-        'defaultZoneId',
-        'consumerName',
-        'infrastructureServices',
+        'sessionToken' => array(
+          'path' => '/sessionToken',
+          'type' => 'single',
+        ),
+        'solutionId' => array(
+          'path' => '/solutionId',
+          'type' => 'single',
+        ),
+        'defaultZoneId' => array(
+          'path' => '/defaultZoneId',
+          'type' => 'single',
+        ),
+        'consumerName' => array(
+          'path' => '/consumerName',
+          'type' => 'single',
+        ),
+        'infrastructureServices' => array(
+          'path' => '/infrastructureServices/infrastructureService',
+          'key' => 'name',
+          'type' => 'multi',
+        ),
+        'provisionedZones' => array(
+          'path' => '/provisionedZones/provisionedZone',
+          'type' => 'tree',
+        ),
       ),
     ),
     'zone' => array(
       'name' => t('Zone'),
       'properties' => array(
-        'description',
+        'description' => array(
+          'path' => '/description',
+          'type' => 'single',
+        ),
+        'properties' => array(
+          'path' => '/properties/property',
+          'key' => 'name',
+          'type' => 'multi',
+        ),
       ),
     ),
     'queue' => array(
       'name' => t('Queue'),
       'properties' => array(
-        'name',
-        'queueUri',
-        'idleTimeout',
-        'minWaitTime',
-        'messageCount',
-        'lastAccessed',
-        'lastModified',
+        'name' => array(
+          'name' => '/name',
+          'type' => 'single',
+        ),
+        'queueUri' => array(
+          'path' => '/queueUri',
+          'type' => 'single',
+        ),
+        'idleTimeout' => array(
+          'path' => '/idleTimeout',
+          'type' => 'single',
+        ),
+        'minWaitTime' => array(
+          'path' => '/minWaitTime',
+          'type' => 'single',
+        ),
+        'messageCount' => array(
+          'path' => '/messageCount',
+          'type' => 'single',
+        ),
+        'lastAccessed' => array(
+          'path' => '/lastAccessed',
+          'type' => 'single',
+        ),
+        'lastModified' => array(
+          'path' => '/lastModified',
+          'type' => 'single',
+        ),
+        'pollingType' => array(
+          'path' => '/[@type]',
+          'type' => 'single',
+        ),
       ),
     ),
     'subscription' => array(
       'name' => t('Subscription'),
       'properties' => array(
-        'zoneId',
-        'contextId',
-        'serviceType',
-        'serviceName',
-        'queueId',
+        'zoneId' => array(
+          'path' => '/zoneId',
+          'type' => 'single',
+        ),
+        'contextId' => array(
+          'path' => '/contextId',
+          'type' => 'single',
+        ),
+        'serviceType' => array(
+          'path' => '/serviceType',
+          'type' => 'single',
+        ),
+        'serviceName' => array(
+          'path' => '/serviceName',
+          'type' => 'single',
+        ),
+        'queueId' => array(
+          'path' => '/queueId',
+          'type' => 'single',
+        ),
       ),
     ),
     'alert' => t('Alert'),

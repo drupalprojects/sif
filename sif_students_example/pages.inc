@@ -21,10 +21,10 @@ function sif_students_example_page() {
     $students = entity_load('sif_data_object', $object_ids);
     foreach ($students as $student) {
       $row = array();
-      $row[] = l($student->name['fullName'], "sif/$student->id");
+      $row[] = l($student->firstName . ' ' . $student->lastName, "sif/$student->id");
       $row[] = $student->localId;
-      if (isset($student->demographics['sexus'])) {
-        $row[] = $student->demographics['sexus'];
+      if (isset($student->sexus)) {
+        $row[] = $student->sexus;
       }
       else {
         $row[] = '';

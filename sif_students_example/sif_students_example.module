@@ -47,38 +47,28 @@ function sif_students_example_sif_data_object_types() {
     'student' => array(
       'name' => t('Student'),
       'properties' => array(
-        'localId',
+        'localId' => array(
+          'path' => '/localId',
+          'type' => 'single',
+        ),
+        'sexus' => array(
+          'path' => '/demographics/sexus',
+          'type' => 'single',
+        ),
+        'emailList' => array(
+          'path' => '/emailList/email',
+          'key' => 'emailType',
+          'type' => 'multi',
+        ),
+        'firstName' => array(
+          'path' => '/name/nameOfRecord/givenName',
+          'type' => 'single',
+        ),
+        'lastName' => array(
+          'path' => '/name/nameOfRecord/familyName',
+          'type' => 'single',
+        ),
       ),
     ),
   );
-}
-
-/**
- * Load Student
- */
-function sif_load_student(&$entity, $ids = array(), $conditions = array()) {
-
-  // Demographics
-  if (property_exists($entity->data, 'demographics')) {
-    $entity->demographics = array();
-    foreach ($entity->data->demographics->children() as $demographic => $s) {
-      $entity->demographics[(string) $demographic] = (string) $s;
-    }
-  }
-
-  // Email addresses
-  if (property_exists($entity->data, 'emailList')) {
-    $entity->emailList = array();
-    foreach ($entity->data->emailList->children() as $s) {
-      $entity->emailList[(string) $s->attributes()->emailType] = (string) $s;
-    }
-  }
-
-  // Name
-  if (property_exists($entity->data, 'emailList')) {
-    $entity->name = array();
-    foreach ($entity->data->name->nameOfRecord->children() as $type => $s) {
-      $entity->name[(string) $type] = (string) $s;
-    }
-  }
 }
