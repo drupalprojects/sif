@@ -330,6 +330,7 @@ function sif_store($type, $xml, $headers) {
     'xml' => $xml,
     'headers' => serialize($headers),
   );
+  module_invoke_all('sif_before_store', $type, $id);
   $entity = entity_create('sif_data_object', $values);
   if (entity_save('sif_data_object', $entity)) {
     module_invoke_all('sif_after_store', $type, $id);
@@ -356,6 +357,7 @@ function sif_local_del($type, $id) {
     '@type' => $type,
     '%title' => $id,
   );
+  module_invoke_all('sif_before_del', $type, $id);
   entity_delete('sif_data_object', $id);
   if (!sif_load($id)) {
     // Report back success.
