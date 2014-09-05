@@ -1,0 +1,6 @@
+name = SIF Mapping
+description = SIF sub module for mapping 1 to 1 relationship.
+package = SIF
+core = 7.x
+
+dependencies[] = sif

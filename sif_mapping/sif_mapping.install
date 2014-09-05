@@ -1,0 +1,89 @@
+<?php
+/**
+ * @file sif_mapping.install
+ * Set up the DB tables
+ */
+
+/**
+ * Implements hook_schema()
+ */
+function sif_mapping_schema(){
+
+  $schema['sif_mapping_types'] = array(
+    'description' => 'Stores custom field mappings for sif_mapping module.',
+    'fields' => array(
+      'mid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => t('Type Mapping identifier'),
+      ),
+      'source_type' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => t('The source object type for the mapping.'),
+      ),
+      'destination_type' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => t('The destination node type for the mapping.'),
+      ),
+      'unique_id' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => t('The RefID field of the mapping.'),
+      ),
+    ),
+    'unique keys' => array(
+      'mid' => array(
+        'mid',
+      )
+    )
+  );
+
+  $schema['sif_mapping_fields'] = array(
+    'description' => 'Stores custom field mappings for sif_mapping module.',
+    'fields' => array(
+      'fid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => t('Field Mapping identifier'),
+      ),
+      'mid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => t('Type Mapping identifier'),
+      ),
+      'source_field' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => t('The source field for the mapping.'),
+      ),
+      'destination_field' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => t('The destination field for the mapping.'),
+      ),
+    ),
+    'unique keys' => array(
+      'fid' => array(
+        'fid',
+      )
+    ),
+    'foreign keys' => array(
+      'sif_mapping_types' => array(
+        'table' => 'sif_mapping_types',
+        'columns' => array('mid' => 'mid'),
+      ),
+    ),
+  );
+
+  return $schema;
+}

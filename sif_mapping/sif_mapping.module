@@ -1,0 +1,324 @@
+<?php
+/**
+ * @file sif_mapping.module
+ * Sub-module for mapping SIF data to Drupal entities
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function sif_mapping_menu() {
+  $items = array();
+  $items['admin/sif/mapping'] = array(
+    'title' => 'SIF Mappings',
+    'description' => 'List of current SIF mappings.',
+    'page callback' => 'sif_mapping_list',
+    'access arguments' => array('configure sif'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/pages.inc',
+  );
+  $items['admin/sif/mapping/map/create'] = array(
+    'title' => 'Create SIF Mapping',
+    'description' => 'Create a new SIF mapping.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_mapping_create_form'),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/pages.inc',
+  );
+  $items['admin/sif/mapping/field/%/add'] = array(
+    'title' => 'Edit SIF Mapping',
+    'description' => 'Edit a SIF mapping.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_mapping_field_form', 4, 5),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+  $items['admin/sif/mapping/field/%/edit'] = array(
+    'title' => 'Edit SIF Mapping',
+    'description' => 'Edit a SIF mapping.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_mapping_field_form', 4, 5),
+    'access arguments' => array('configure sif'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+  $items['admin/sif/mapping/map/%/delete'] = array(
+    'title' => 'Delete SIF Mapping',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_mapping_type_delete_form', 4),
+    'access arguments' => array('configure sif'),
+    'weight' => 1,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+  $items['admin/sif/mapping/field/%/delete'] = array(
+    'title' => 'Delete SIF Mapping',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sif_mapping_field_delete_form', 4),
+    'access arguments' => array('configure sif'),
+    'weight' => 1,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Returns the list of all mappings, or
+ *
+ * @param  null $object_type
+ *   The SIF object type to return the mapping for
+ * @return mixed
+ *   Array of mapping objects if $object_type is NULL, a single mapping
+ *   object if not, FALSE if no mappings are found
+ */
+function sif_mapping_get_mappings($object_type = NULL) {
+  // Get the mapping list from the DB
+  $query = db_select('sif_mapping_types', 't');
+  $query->leftJoin('sif_mapping_fields', 'f', 't.mid = f.mid');
+  $query->fields('t', array('mid', 'source_type', 'destination_type', 'unique_id'));
+  $query->fields('f', array('fid', 'source_field', 'destination_field'));
+  if ($object_type) {
+    $query->condition('source_type', $object_type, '=');
+  }
+  $results = $query->execute();
+
+  // Create the mapping object(s)
+  $items = array();
+  $count = 0;
+  while ($result = $results->fetchAssoc()) {
+    $source_type = $result['source_type'];
+    if (!isset($items[$source_type])) {
+      $items[$source_type] = new stdClass();
+    }
+    $items[$source_type]->mid = $result['mid'];
+    $items[$source_type]->unique_id = $result['unique_id'];
+    $items[$source_type]->source_type = $source_type;
+    $items[$source_type]->destination_type = $result['destination_type'];
+    if ($result['fid'] !== NULL) {
+      $items[$source_type]->fields[$result['fid']]->source_field = $result['source_field'];
+      $items[$source_type]->fields[$result['fid']]->destination_field = $result['destination_field'];
+    }
+    else {
+      $items[$source_type]->fields = array();
+    }
+    $count++;
+  }
+
+  // Return the array, the object, or FALSE
+  if ($count){
+    if ($object_type) {
+      return $items[$object_type];
+    }
+    return $items;
+  }
+  return FALSE;
+}
+
+/**
+ * Maps the data as defined in the GUI, SIF source -> Drupal destination
+ *
+ * @param $type
+ *   The SIF object type
+ * @param $id
+ *   The SIF RefID
+ */
+function sif_mapping_map($type, $id) {
+  // Get the mapping object for this SIF object type
+  $mappings = sif_mapping_get_mappings($type);
+
+  if (is_object($mappings)){
+    // Load the SIF object
+    $object = sif_load($id);
+
+    // Setup for node vs. user entities
+    if ($mappings->destination_type == 'user') {
+      $type = 'user';
+    }
+    else {
+      $type = 'node';
+    }
+
+    // Query for an existing entity with the RefID
+    $entity = sif_mapping_load_by_refid($type, $mappings->unique_id, $id);
+
+    // If there is an existing entity, wrap it
+    if (is_object($entity)) {
+      $entity = entity_metadata_wrapper($type, $entity, array('bundle' => $mappings->destination_type));
+      $lid = $entity->getIdentifier();
+    }
+    // If there is no existing entity, create one and wrap it
+    else {
+      $values = array(
+        'type' => $mappings->destination_type,
+        'bundle' => $mappings->destination_type,
+      );
+      $entity = entity_create($type, $values);
+      $entity = entity_metadata_wrapper($type, $entity, array('bundle' => $mappings->destination_type));
+
+      watchdog('sif_mapping', 'Adding %source "%sourceval" to %destination on %type %id', array('%source' => 'id', '%sourceval' => $object->id, '%destination' => $mappings->unique_id, '%type' => $type, '%id' => 'new'));
+      $entity->{$mappings->unique_id}->set($id);
+
+      // Workaround for a user entity oddity
+      if ($type == 'user') {
+        $name_source = _sif_mapping_get_source_from_dest('name', $mappings);
+        watchdog('sif_mapping', 'Adding %source "%sourceval" to %destination on %type %id', array('%source' => $name_source, '%sourceval' => $object->{$name_source}, '%destination' => 'name', '%type' => $type, '%id' => 'new'));
+        $entity->name->set($object->{$name_source});
+      }
+
+      $lid = 'new';
+    }
+
+    // Loop through each defined mapping
+    foreach ($mappings->fields as $fid => $data) {
+      $source_field = strval($data->source_field);
+      $destination_field = strval($data->destination_field);
+
+      // If the SIF object field has multiple values, loop through them and set them to the mapped values
+      if (is_array($object->{$source_field})) {
+        foreach ($object->{$source_field} as $key => $value) {
+          watchdog('sif_mapping', 'Adding %source "%sourceval" to %destination on %type %id', array('%source' => $source_field, '%sourceval' => $value, '%destination' => $destination_field, '%type' => $type, '%id' => $lid));
+          $entity->{$destination_field}[] = $value;
+        }
+      }
+      // If it's a single value, just set it
+      else {
+        if ($destination_field != 'name') { // Workaround for user entity oddity
+          watchdog('sif_mapping', 'Adding %source "%sourceval" to %destination on %type %id', array('%source' => $source_field, '%sourceval' => $object->{$source_field}, '%destination' => $destination_field, '%type' => $type, '%id' => $lid));
+          $entity->{$destination_field}->set($object->{$source_field});
+        }
+      }
+    }
+
+    // Save the entity
+    $entity->save();
+    module_invoke_all('sif_mapping_after', $entity->getBundle(), $entity->getIdentifier());
+  }
+  else {
+    watchdog('sif_mapping', 'No mappings available');
+  }
+}
+
+/**
+ * Grabs a single mapping entry by mid
+ *
+ * @param $mid
+ *   SIF mapping fields ID
+ * @return mixed
+ *   A single SIF field mapping
+ */
+function sif_mapping_get_type_mapping($mid) {
+  $query = db_select('sif_mapping_types', 't');
+  $query->fields('t');
+  $query->condition('mid', $mid, '=');
+  $results = $query->execute()->fetchAssoc();
+
+  return $results;
+}
+
+/**
+ * Grabs a single mapping entry by fid
+ *
+ * @param $fid
+ *   SIF mapping fields ID
+ * @return mixed
+ *   A single SIF field mapping
+ */
+function sif_mapping_get_field_mapping($fid) {
+  $query = db_select('sif_mapping_types', 't');
+  $query->join('sif_mapping_fields', 'f', 't.mid = f.mid');
+  $query->fields('t');
+  $query->fields('f');
+  $query->condition('fid', $fid, '=');
+  $results = $query->execute()->fetchAssoc();
+
+  return $results;
+}
+
+/**
+ * Grabs a full mapping entry by mid
+ *
+ * @param $mid
+ *   SIF mapping fields ID
+ * @return mixed
+ *   A single SIF field mapping
+ */
+function sif_mapping_get_map_mapping($mid) {
+  $query = db_select('sif_mapping_types', 't');
+  $query->leftJoin('sif_mapping_fields', 'f', 't.mid = f.mid');
+  $query->fields('t');
+  $query->fields('f');
+  $query->condition('t.mid', $mid, '=');
+  $results = $query->execute();
+
+  $array = array();
+  while ($result = $results->fetchAssoc()) {
+    $array[] = $result;
+  }
+
+  return $array;
+}
+
+/**
+ * Helper to get the source field from the destination field
+ *
+ * @param $field
+ *   The destination to look up
+ * @param $mappings
+ *   The mapping object
+ * @return string
+ *   The source field
+ */
+function _sif_mapping_get_source_from_dest($field, &$mappings) {
+  $source = FALSE;
+  foreach ($mappings->fields as $data){
+    if ($data->destination_field == $field) {
+      $source = strval($data->source_field);
+    }
+  }
+  return $source;
+}
+
+
+/**
+ * Helper function for loading an entity by RefID
+ *
+ * @param $type
+ *   Entity type
+ * @param $field
+ *   The field that holds the refid
+ * @param $id
+ *   RefID that we want to search for
+ * @return bool|mixed
+ *   Returns the entity object if found, otherwise FALSE
+ */
+function sif_mapping_load_by_refid($type, $field, $id) {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', $type)
+    ->fieldCondition($field, 'value', $id, '=');
+  $result = $query->execute();
+
+  if (isset($result['node'])) {
+    $object_id = array_keys($result[$type]);
+    $object = entity_load_single($type, $object_id);
+    return $object;
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_features_api
+ */
+function sif_mapping_features_api() {
+  return array(
+    'sif_mapping_config' => array(
+      'name' => 'Sif Mapping Mappings',
+      'file' => drupal_get_path('module', 'sif_mapping') . '/sif_mapping.features.inc',
+      'default_hook' => 'sif_mapping_config_features_default_settings',
+      'feature_source' => TRUE,
+    ),
+  );
+}
