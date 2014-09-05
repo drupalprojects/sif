@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file requests.inc
+ * Defines a SIF Request class for making and handling requests
+ */
 
 /**
  * @property array arg_types
@@ -287,11 +291,11 @@ class sifRequest {
     $url .= "/$this->sif_type" . 's';
     foreach ($this->url_args as $arg_type => $value) {
       switch ($this->arg_types[$arg_type]) {
-        case 'multi':
-          if (!$value) {
-            $url .= "/$this->sif_type";
-          }
-          break;
+//        case 'multi':
+//          if (!$value) {
+//            $url .= "/$this->sif_type";
+//          }
+//          break;
         case 'matrix':
           if ($value) {
             $matrix .= ";$arg_type=$value";
@@ -342,6 +346,11 @@ class sifRequest {
     return $this->url_args;
   }
 
+  /**
+   * Make the actual SIF request
+   * @param null $xml
+   *   The XML object to use in the request, if needed.
+   */
   public function sif_request($xml = NULL) {
     module_invoke_all('sif_before_request', $this->request_type);
     if (module_exists('rules')) {
@@ -356,10 +365,12 @@ class sifRequest {
         'data' => $xml,
         'headers' => array(
           $authorization_header => sif_get_application_key($this->token),
-          'Accept' => 'application/xml',
-          'Content-Type' => 'application/xml',
+          'Accept' => 'application/sif+xml',
         ),
       );
+      if ($this->request_type == 'PUT' || $this->request_type == 'POST') {
+        $options['headers']['Content-Type'] = 'application/sif+xml';
+      }
       if ($this->nav_info) {
         $options['headers']['navigationId'] = $this->nav_info['navigation_id'];
       }
@@ -399,7 +410,7 @@ class sifRequest {
         $this->error = FALSE;
       }
       else {
-        $error = $this->response->error;
+        $error = check_plain($this->response->error);
 
         if (property_exists($this->response, 'data')) {
           drupal_set_message(t('@type unsuccessful: @message', array('@type' => $this->sif_type, '@message' => strip_tags($this->response->data))));
