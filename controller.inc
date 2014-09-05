@@ -19,51 +19,54 @@ class SifEntityAPIController extends EntityAPIController {
     foreach ($entities as &$entity) {
 
       // Give all entities a SimpleXML object
-      $entity->data = new SimpleXMLElement($entity->xml);
+      $entity->data = new SimpleXMLElement(preg_replace("/xmlns/", 'ns', $entity->xml));
 
       // Reload headers as array
       $entity->meta = unserialize(strval($entity->headers));
 
       // Load all desired properties
       foreach ($types[$entity->type]['properties'] as $property_name => $property) {
-        $items = $entity->data->xpath('/' . $entity->type . $property['path']);
+        $path = '/' . $entity->type . $property['path'];
+        $items = $entity->data->xpath($path);
 
-        switch ($property['type']) {
-          case 'single':
-            $entity->{$property_name} = strval($items[0]);
-            break;
+        if ($items && count($items)) {
+          switch ($property['type']) {
+            case 'single':
+              $entity->{$property_name} = strval($items[0]);
+              break;
 
-          case 'multi':
-            $entity->{$property_name} = array();
-            foreach ($items as $item) {
-              $key = FALSE;
-              if (isset($property['key'])){
-                $key = strval($item->attributes()->{$property['key']});
-                $entity->{$property_name}[$key] = strval($item);
+            case 'multi':
+              $entity->{$property_name} = array();
+              foreach ($items as $item) {
+                $key = FALSE;
+                if (isset($property['key'])){
+                  $key = strval($item->attributes()->{$property['key']});
+                  $entity->{$property_name}[$key] = strval($item);
+                }
+                else {
+                  $entity->{$property_name}[$key] = strval($item);
+                }
               }
-              else {
-                $entity->{$property_name}[$key] = strval($item);
-              }
-            }
-            break;
+              break;
 
-          case 'tree':
-            foreach ($items as $item) {
-              $iterator = new SimpleXMLIterator($item->asXML());
+            case 'tree':
+              foreach ($items as $item) {
+                $iterator = new SimpleXMLIterator($item->asXML());
 
-              $keys = array();
-              foreach ($item->attributes() as $key => $value) {
-                $keys[] = $value;
+                $keys = array();
+                foreach ($item->attributes() as $key => $value) {
+                  $keys[] = $value;
+                }
+                $key = implode(':', $keys);
+                if ($key) {
+                  $entity->{$property_name}[$key] = $this->tree_iterator($iterator);
+                }
+                else {
+                  $entity->{$property_name} = $this->tree_iterator($iterator);
+                }
               }
-              $key = implode(':', $keys);
-              if ($key) {
-                $entity->{$property_name}[$key] = $this->tree_iterator($iterator);
-              }
-              else {
-                $entity->{$property_name} = $this->tree_iterator($iterator);
-              }
-            }
-            break;
+              break;
+          }
         }
       }
     }
