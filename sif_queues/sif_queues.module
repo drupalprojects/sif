@@ -138,6 +138,7 @@ function sif_queues_cron() {
  * Processes the SIF queues stored in the drupal queue
  */
 function sif_queues_queueprocess($queue) {
+  $queue = check_plain($queue);
   $last_message = variable_get("sif_queue_last_$queue", '');
   $settings = variable_get("sif_queue_$queue", array('length' => 1, 'period' => 'hour', 'status' => 'enable', 'last' => time(), 'drupalqueue' => 0));
   if ($settings['status'] == 'enable'){
@@ -155,10 +156,10 @@ function sif_queues_queueprocess($queue) {
           $xml = $xml_in;
         }
         if (property_exists($xml->attributes(), 'id')) {
-          $id = (string) $xml->attributes()->id;
+          $id = check_plain(strval($xml->attributes()->id));
         }
         else {
-          $id = (string) $xml->attributes()->refId;
+          $id = check_plain(strval($xml->attributes()->refId));
         }
         sif_store($type, $xml->asXML(), $results->headers);
         if ($settings['drupalqueue']) {
