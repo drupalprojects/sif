@@ -404,9 +404,7 @@ function sif_log($options, &$response) {
 
     $args['!options'] = dpr($options, TRUE);
     if (property_exists($response, 'data')) {
-      if ($response->data) {
-        $args['!data'] = clean_xml($response->data, TRUE);
-      }
+      $args['%data'] = $response->data;
     }
     if (property_exists($response, 'request')) {
       $args['!request'] = dpr($response->request, TRUE);
@@ -424,7 +422,7 @@ function sif_log($options, &$response) {
       ---- Options ---- !options<br/>
       ---- Request ---- !request<br/>
       ---- Headers ---- !headers<br/>
-      ---- Data ---- !data<br/>
+      ---- Data ---- %data<br/>
       ---- Error ---- !error', $args);
   }
 }
