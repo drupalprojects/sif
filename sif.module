@@ -148,16 +148,16 @@ function sif_get($type, $path_args = array(), $environment = NULL) {
         }
       }
       if (property_exists($request->response, 'headers')) {
-        if ($request->response->headers['navigationId']) {
+        if (isset($request->response->headers['navigationId'])) {
           $nav_info['timestamp'] = time();
-          $nav_info['navigation_id'] = $request->response->headers['navigationId'];
+          $nav_info['navigation_id'] = check_plain($request->response->headers['navigationId']);
           if ($request->response->headers['navigationLastPage']) {
-            $nav_info['navigation_last_page'] = $request->esponse->headers['navigationLastPage'];
+            $nav_info['navigation_last_page'] = check_plain($request->response->headers['navigationLastPage']);
           }
           if ($request->response->headers['navigationPage']) {
-            $nav_info['navigation_page'] = $request->response->headers['navigationPage'];
+            $nav_info['navigation_page'] = check_plain($request->response->headers['navigationPage']);
           }
-          variable_set("sif_nav_$request->query_stamp", $nav_info);
+          variable_set('sif_nav_' . $request->getQueryStamp(), $nav_info);
         }
       }
       return TRUE;
